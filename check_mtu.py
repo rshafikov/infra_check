@@ -27,6 +27,9 @@ def check_mtu(destination_server='localhost', max_size=1500, step=100):
             mtu_dict['OK'].append(size)
         else:
             mtu_dict['FAILED'].append(size)
+    if mtu_dict['OK'] == [] and mtu_dict['FAILED'] == []:
+        raise Exception('ZERO PINGS! TRY TO CHECK DESTINATION SERVER')
+
     return mtu_dict
 
 
