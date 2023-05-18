@@ -868,4 +868,24 @@ fi
 EOF
 
 chmod 775 ./pars11.sh
+
+cat << 'EOF' > ./ini.sh
+#!/bin/bash
+echo -e -n "Введите номер версии для ОС Астра: 1-(1.6) или 2-(1.7) \n"
+read -r pa_os
+
+if [ "$pa_os" = 1 ]; then
+   source <(grep = 16.ini | sed 's/ *= */=/g')
+    elif [ "$pa_os" = 2 ]; then
+     source <(grep = 17.ini | sed 's/ *= */=/g')
+
+
+ else
+  echo "Нет верных данных повторите запуск"
+   exit 0
+fi
+
+EOF
+
+chmod 775 ./ini.sh
 source pars.sh
