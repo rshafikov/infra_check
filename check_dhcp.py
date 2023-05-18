@@ -16,13 +16,15 @@ def packet_handler(packet):
         dict_represent = {
             "iface": '{}'.format(iface),
             "message_type": dhcp_info,
-            "direction": 'source ({}:{}) -> dest ({}:{})'.format(
-                ip_src, udp_sport, ip_dst, udp_dport),
+            "source": ip_src,
+            "destination": ip_dst,
             "cur_time": time.strftime('%I:%M:%S'),
             "ether_src": '{}'.format(ether_src),
-            "ether_dst": '{}'.format(ether_dst)
+            "ether_dst": '{}'.format(ether_dst),
+            "preview": 'source ({}:{}) -> dest ({}:{})'.format(
+                ip_src, udp_sport, ip_dst, udp_dport)
         }
-        return json.dumps(dict_represent, indent=4)
+        return dict_represent
 
     except Exception as e:
         return e
@@ -30,10 +32,17 @@ def packet_handler(packet):
 
 def listen_dhcp_msg():
     filter_expr = "port 67 or port 68"
-    print('start_time: ' + time.strftime("%I:%M:%S"))
-    result = sniff(filter=filter_expr, prn=packet_handler, timeout=20)
-    print('{}'.format(result)[1:-1])
-    print('end_time: ' + time.strftime("%I:%M:%S"))
+    print('sniff_start_time: ' + time.strftime("%I:%M:%S"))
+    result = sniff(filter=filter_expr, timeout=20)
+    output = [packet_handler(packet) for packet in result]
+    dhcp_servers = [
+        p['source'] for p in output if p['message_type'] == 'DHCP Ack']
+    print('\n'.join([json.dumps(p, indent=4) for p in output]))
+    print('{}\n'.format(result)[1:-1])
+    print(
+        'Available {} DHCP: {}'.format(
+            len(set(dhcp_servers)), set(dhcp_servers)))
+    print('sniff_end_time: ' + time.strftime("%I:%M:%S"))
 
 
 if __name__ == '__main__':
