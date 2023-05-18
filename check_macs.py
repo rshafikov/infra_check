@@ -1,3 +1,7 @@
+from core import run_check_wrapper
+
+
+@run_check_wrapper
 def check_macs(directory='dhcpd.conf'):
     macs = []
     with open(directory, encoding='utf-8') as file:

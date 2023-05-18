@@ -1,7 +1,10 @@
 import os
 import glob
 
+from core import run_check_wrapper
 
+
+@run_check_wrapper
 def search_cyrillic(cobbler_directory='./'):
     errors_with_files = 0
     files = glob.glob(cobbler_directory + '/**/*', recursive=True)

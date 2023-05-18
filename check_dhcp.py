@@ -2,6 +2,8 @@ from scapy.all import sniff, Ether, IP, UDP
 import time
 import json
 
+from core import run_check_wrapper
+
 
 def packet_handler(packet):
     try:
@@ -30,6 +32,7 @@ def packet_handler(packet):
         return e
 
 
+@run_check_wrapper
 def listen_dhcp_msg():
     filter_expr = "port 67 or port 68"
     print('sniff_start_time: ' + time.strftime("%I:%M:%S"))

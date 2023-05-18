@@ -1,6 +1,9 @@
 import subprocess
 
+from core import run_check_wrapper
 
+
+@run_check_wrapper
 def check_ldap(password, servers, container, base, filter):
     """
     input args:

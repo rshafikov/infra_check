@@ -1,4 +1,3 @@
-import logging
 import subprocess
 import time
 
@@ -9,28 +8,7 @@ from check_context_without_comments import search_cyrillic
 from check_san import check_san
 from check_mtu import check_mtu
 from check_macs import check_macs
-
-
-logging.basicConfig(
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    filename='checks.log',
-    filemode='a',
-    level=logging.INFO
-)
-
-
-def run_check_wrapper(func):
-    def wrapper(*args, **kwargs):
-        try:
-            result = func(*args, **kwargs)
-            logging.info('func {} - OK'.format(func.__name__))
-            return result
-        except Exception as error:
-            logging.error(('There is an error with {}'.format(func.__name__),
-                           'Full error: \n{}'.format(error)))
-            return 'There is an error with {}'.format(func.__name__)
-
-    return wrapper
+from core import logging, run_check_wrapper
 
 
 @run_check_wrapper
@@ -71,15 +49,14 @@ def parse_data():
         )
 
 
-lines, packages, ntp_servers, dns_servers, ldap_ipa, dhcp_servers, ldap_msad, san_servers, mtu = parse_data()
+(lines, packages, ntp_servers, dns_servers, ldap_ipa,
+ dhcp_servers, ldap_msad, san_servers, mtu) = parse_data()
 
 print('<NTP>'.center(69, '-'))
-check_ntp = run_check_wrapper(check_ntp)
 ntp_output = check_ntp(ntp_servers)
 print(ntp_output)
 
 print('<DNS>'.center(69, '-'))
-check_dns = run_check_wrapper(check_dns)
 dns_output = check_dns(dns_servers)
 print(dns_output)
 
@@ -100,7 +77,6 @@ else:
 print('<LDAP-servers>'.center(69, '-'))
 if 'Package ldap-utils is installed' in packages:
     print('<IPA>'.center(69, '-'))
-    check_ldap = run_check_wrapper(check_ldap)
     try:
         password = ldap_ipa[2][0]
         servers = ldap_ipa[0]
@@ -131,19 +107,15 @@ else:
         )
 
 print('<Cyrillic check>'.center(69, '-'))
-search_cyrillic = run_check_wrapper(search_cyrillic)
 search_cyrillic('/var/www/html/')
 
 print('<SAN>'.center(69, '-'))
-check_san = run_check_wrapper(check_san)
 print(check_san(san_servers))
 
 print('<MTU>'.center(69, '-'))
-check_mtu = run_check_wrapper(check_mtu)
 print(check_mtu(destination_server=dns_servers[0], max_size=int(mtu[0])))
 
 print("<MAC's>".center(69, '-'))
-check_macs = run_check_wrapper(check_macs)
 print(check_macs(directory='/etc/dhcp/dhcpd.conf'))
 
 print("<END OF TEST>".center(69, '-'))

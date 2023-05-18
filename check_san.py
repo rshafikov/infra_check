@@ -1,7 +1,10 @@
 import requests
 import sys
 
+from core import run_check_wrapper
 
+
+@run_check_wrapper
 def check_san(servers):
     stdout = ''
     alive_servers = []
@@ -11,13 +14,13 @@ def check_san(servers):
             http_response = requests.get(
                 "http://{}/".format(server), verify=False, timeout=3)
             http_status = http_response.status_code
-        except Exception as error:
+        except Exception:
             http_status = 500
         try:
             https_response = requests.get(
                 "https://{}/".format(server), verify=False, timeout=3)
             https_status = https_response.status_code
-        except Exception as error:
+        except Exception:
             https_status = 500
         if http_status == 200 or https_status == 200:
             alive_servers.append(server)

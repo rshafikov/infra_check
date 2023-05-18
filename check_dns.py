@@ -1,7 +1,10 @@
 import socket
 import sys
 
+from core import run_check_wrapper
 
+
+@run_check_wrapper
 def check_dns(servers: str):
     alive_servers = []
     bad_servers = []

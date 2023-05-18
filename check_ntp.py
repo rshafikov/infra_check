@@ -4,6 +4,8 @@ import socket
 import struct
 import time
 
+from core import run_check_wrapper
+
 
 def getNTPtime(host='pool.ntp.org'):
     port = 123
@@ -20,6 +22,7 @@ def getNTPtime(host='pool.ntp.org'):
     return time.ctime(t).replace('  ', ' ')
 
 
+@run_check_wrapper
 def check_ntp(servers):
     alive_servers = []
     time_list = {}
