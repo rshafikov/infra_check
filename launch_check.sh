@@ -757,19 +757,6 @@ EOF
 
 chmod 775 ./greentext.sh
 
-#cat << 'EOF' > ./test_dhcp.sh
-##!/bin/bash
-
-#`which python3` /custom_checks/check_dhcp.py &
-#sleep 5
-#dhclient  > /dev/null
-#echo wait ...
-#sleep 15
-
-#EOF
-
-#chmod 775 ./test_dhcp.sh
-
 cat << 'EOF' > ./clear_tmp.sh
 #!/bin/bash
 function clear_tmp() {
