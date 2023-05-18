@@ -3,3 +3,4 @@ NTP localhost
 DNS 8.8.8.8
 DNS 1.2.3.4
 MTU -10
+OK

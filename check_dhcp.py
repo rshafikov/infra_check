@@ -28,8 +28,13 @@ def packet_handler(packet):
         return e
 
 
-filter_expr = "port 67 or port 68"
-print('start_time: ' + time.strftime("%I:%M:%S"))
-result = sniff(filter=filter_expr, prn=packet_handler, timeout=20)
-print('{}'.format(result)[1:-1])
-print('end_time: ' + time.strftime("%I:%M:%S"))
+def listen_dhcp_msg():
+    filter_expr = "port 67 or port 68"
+    print('start_time: ' + time.strftime("%I:%M:%S"))
+    result = sniff(filter=filter_expr, prn=packet_handler, timeout=20)
+    print('{}'.format(result)[1:-1])
+    print('end_time: ' + time.strftime("%I:%M:%S"))
+
+
+if __name__ == '__main__':
+    listen_dhcp_msg()

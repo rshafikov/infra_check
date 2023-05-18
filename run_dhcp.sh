@@ -5,4 +5,3 @@ sleep 5
 dhclient  > /dev/null
 echo wait ...
 sleep 15
-cat out.txt
