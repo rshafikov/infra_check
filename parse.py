@@ -26,9 +26,9 @@ def run_check_wrapper(func):
             result = func(*args, **kwargs)
             logging.info('func {} - OK'.format(func.__name__))
             return result
-        except Exception as e:
+        except Exception as error:
             logging.error(('There is an error with {}'.format(func.__name__),
-                           'Full error: \n{}'.format(e)))
+                           'Full error: \n{}'.format(error)))
             return 'There is an error with {}'.format(func.__name__)
 
     return wrapper
@@ -80,9 +80,10 @@ dns_output = check_dns(dns_servers)
 print(dns_output)
 
 print('<DHCP>'.center(65, '-'))
-if 'OK' in lines:
-    cmd = ['source', 'run_dhcp.sh']
-    subprocess.run(cmd)
+if 'OK  Package dhclient is installed.\n' in lines:
+    cmd = ['/bin/bash', 'run_dhcp.sh']
+    dhcp_check = run_check_wrapper(subprocess.run)
+    dhcp_check(cmd)
     time.sleep(1)
 
 else:
