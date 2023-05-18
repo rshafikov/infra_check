@@ -37,7 +37,7 @@ def run_check_wrapper(func):
 @run_check_wrapper
 def parse_data():
     try:
-        with open("/root/endpars.txt", "r") as file:
+        with open("/root/endpars", "r") as file:
             lines = [line for line in file]
     except Exception:
         logging.info('endparse taken from local dir')

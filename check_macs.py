@@ -20,7 +20,7 @@ def check_macs(directory='dhcpd.conf'):
 
 
 def main():
-    print(check_macs())
+    print(check_macs(input('Write dhcpd.conf path:\n')))
 
 
 if __name__ == '__main__':
