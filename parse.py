@@ -35,6 +35,10 @@ def run_check_wrapper(func):
 
 @run_check_wrapper
 def parse_data():
+    cmd = '/bin/bash /root/check_pack.sh'
+    check_packages = run_check_wrapper(subprocess.getoutput)
+    packages = check_packages(cmd)
+    time.sleep(1)
     try:
         with open("/root/endpars", "r") as file:
             lines = [line for line in file]
@@ -56,6 +60,7 @@ def parse_data():
 
     return (
         lines,
+        packages,
         ntp_servers,
         dns_servers,
         ldap_ipa,
@@ -66,7 +71,7 @@ def parse_data():
         )
 
 
-lines, ntp_servers, dns_servers, ldap_ipa, dhcp_servers, ldap_msad, san_servers, mtu = parse_data()
+lines, packages, ntp_servers, dns_servers, ldap_ipa, dhcp_servers, ldap_msad, san_servers, mtu = parse_data()
 
 print('<NTP>'.center(69, '-'))
 check_ntp = run_check_wrapper(check_ntp)
@@ -79,8 +84,8 @@ dns_output = check_dns(dns_servers)
 print(dns_output)
 
 print('<DHCP>'.center(69, '-'))
-if 'OK  Package dhclient is installed.\n' in lines:
-    cmd = ['/bin/bash', 'run_dhcp.sh']
+if 'Package isc-dhcp-client is installed' in packages:
+    cmd = ['/bin/bash', '/root/custom_checks/run_dhcp.sh']
     dhcp_check = run_check_wrapper(subprocess.run)
     dhcp_check(cmd)
     time.sleep(1)
@@ -88,12 +93,12 @@ if 'OK  Package dhclient is installed.\n' in lines:
 else:
     print(
         'Failed to check DHCP-servers.\n'
-        'Please install dhclient package at first!\n'
-        'Try this command: apt-get install nmap'
+        'Please install dhclient utility at first!\n'
+        'Try this command: apt-get install isc-dhcp-client'
         )
 
 print('<LDAP-servers>'.center(69, '-'))
-if 'OK  Package ldap-utils is installed.\n' in lines:
+if 'Package ldap-utils is installed' in packages:
     print('<IPA>'.center(69, '-'))
     check_ldap = run_check_wrapper(check_ldap)
     try:
@@ -118,9 +123,10 @@ if 'OK  Package ldap-utils is installed.\n' in lines:
         print('There is an error with MSAD LDAP-parameters: {}'.format(error))
 
 else:
+    logging.info('func {} - NOT HAS BEEN LAUNCHED'.format(check_ldap.__name__))
     print(
         'Failed to check LDAP-servers.\n'
-        'Please install ldap-utils package at first!\n'
+        'Please install ldapsearch utility at first!\n'
         'Try this command: apt-get install ldap-utils'
         )
 
