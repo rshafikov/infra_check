@@ -891,13 +891,13 @@ chmod 775 ./ini.sh
 
 cat << 'EOF' > ./16.ini
 [16]
-ars=/var/www/html/stable/astra/1.6/initrc_
+pars=/var/www/html/stable/astra/1.6/initrc_
 pars2=/var/www/html/stable/astra/1.6/initrc_2
 EOF
 
 cat << 'EOF' > ./17.ini
 [17]
-ars=/var/www/html/stable/astra/1.7/initrc_
+pars=/var/www/html/stable/astra/1.7/initrc_
 pars2=/var/www/html/stable/astra/1.7/initrc_2
 EOF
 source pars.sh
