@@ -5,6 +5,8 @@ from core import run_check_wrapper
 
 @run_check_wrapper
 def check_mtu(destination_server='localhost', max_size=1500, step=100):
+    max_size = int(max_size)
+    step = int(step)
     print('DO NOT FORGET: THERE IS 28 BYTES HEADER IN MTU PACKAGE!')
     mtu_dict = {
         'DESTINATION': destination_server,

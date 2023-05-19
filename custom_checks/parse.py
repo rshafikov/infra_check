@@ -34,7 +34,7 @@ def parse_data():
     ldap_msad = [line.split()[2:] for line in lines if line.startswith(
         'Keystone AD')]
     san_servers = [line.split()[1] for line in lines if line.startswith('SAN')]
-    mtu = [line.split()[1] for line in lines if line.startswith('MTU')]
+    mtu = {'mtu': line.split()[1] for line in lines if line.startswith('MTU')}
 
     return (
         lines,
@@ -113,7 +113,8 @@ print('<SAN>'.center(69, '-'))
 print(check_san(san_servers))
 
 print('<MTU>'.center(69, '-'))
-print(check_mtu(destination_server=dns_servers[0], max_size=int(mtu[0])))
+print(check_mtu(destination_server=dns_servers[0], max_size=mtu.get(
+    'mtu', default=1500)))
 
 print("<MAC's>".center(69, '-'))
 print(check_macs(directory='/etc/dhcp/dhcpd.conf'))
