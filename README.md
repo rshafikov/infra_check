@@ -45,11 +45,13 @@
 	tar zxvf cobbler_check.tgz
 ```
 
-3. Выдать права скрипту `launch_check.sh` и активировать виртуальное окружение:
+3. Выдать права скрипту `launch_check.sh`, активировать виртуальное окружение и проверить его:
 
 ```sh
 	chmod 755 launch_check.sh
 	source /root/custom_checks/venv/bin/activate
+	diff -s requirements.txt <(pip freeze)
+	# пример вывода: Files requirements.txt and /dev/fd/63 are identical
 ```
 	
 4. Заполнить данные от заказчика в `FirstBoot`. 
