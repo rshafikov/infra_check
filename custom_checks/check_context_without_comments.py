@@ -6,6 +6,9 @@ from core import run_check_wrapper
 
 @run_check_wrapper
 def search_cyrillic(cobbler_directory='./'):
+    if not os.path.exists(cobbler_directory):
+        raise FileNotFoundError(
+            "file path {} doesn't exist".format(cobbler_directory))
     errors_with_files = 0
     files = glob.glob(cobbler_directory + '/**/*', recursive=True)
     for filename in files:
@@ -56,7 +59,6 @@ def search_cyrillic(cobbler_directory='./'):
                 print('There is an error {} in file {}'.format(
                     error, filename)
                     )
-    # print(errors_with_files)
 
 
 def main():

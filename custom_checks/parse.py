@@ -109,13 +109,12 @@ else:
         )
 
 print('<Cyrillic check>'.center(69, '-'))
-search_cyrillic('/var/www/html/')
+print(search_cyrillic('/var/www/html/'))
 
 print('<SAN>'.center(69, '-'))
 print(check_san(san_servers))
 
 print('<MTU>'.center(69, '-'))
-print(dns_servers.get('dns', ['localhost'])[0])
 print(check_mtu(destination_server=dns_servers.get('dns', ['localhost'])[0],
                 max_size=mtu.get('mtu', 1500)))
 

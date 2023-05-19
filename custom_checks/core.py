@@ -19,7 +19,7 @@ def run_check_wrapper(func):
             return result
         except Exception as error:
             logging.error(('There is an error with {}'.format(func.__name__),
-                           'Full error: \n{}'.format(error)))
+                           'Full error: {}'.format(error)))
             return 'There is an error with {}'.format(func.__name__)
 
     return wrapper
