@@ -13,20 +13,21 @@ from core import logging, run_check_wrapper
 
 @run_check_wrapper
 def parse_data():
+    logging.info('<START TEST>'.center(69, '-'))
     cmd = '/bin/bash /root/check_pack.sh'
     check_packages = run_check_wrapper(subprocess.getoutput)
     packages = check_packages(cmd)
     time.sleep(1)
     try:
-        with open("/root/endpars", "r") as file:
+        with open('/root/endpars', 'r') as file:
             lines = [line for line in file]
     except Exception:
         logging.info('endparse taken from local dir')
         print('Trying to parse data locally')
-        with open("endpars", "r") as file:
+        with open('endpars', 'r') as file:
             lines = [line for line in file]
     ntp_servers = [line.split()[1] for line in lines if line.startswith('NTP')]
-    dns_servers = [line.split()[1] for line in lines if line.startswith('DNS')]
+    dns_servers = {'dns': line.split()[1] for line in lines if line.startswith('DNS')}
     ldap_ipa = [line.split()[2:] for line in lines if line.startswith(
             'Keystone FreeIpa')]
     dhcp_servers = [line.split()[2] for line in lines if line.startswith(
@@ -57,7 +58,7 @@ ntp_output = check_ntp(ntp_servers)
 print(ntp_output)
 
 print('<DNS>'.center(69, '-'))
-dns_output = check_dns(dns_servers)
+dns_output = check_dns(dns_servers.get('dns', []))
 print(dns_output)
 
 print('<DHCP>'.center(69, '-'))
@@ -113,10 +114,11 @@ print('<SAN>'.center(69, '-'))
 print(check_san(san_servers))
 
 print('<MTU>'.center(69, '-'))
-print(check_mtu(destination_server=dns_servers[0], max_size=mtu.get(
-    'mtu', default=1500)))
+print(dns_servers.get('dns', ['localhost'])[0])
+print(check_mtu(destination_server=dns_servers.get('dns', ['localhost'])[0],
+    max_size=mtu.get('mtu', 1500)))
 
 print("<MAC's>".center(69, '-'))
 print(check_macs(directory='/etc/dhcp/dhcpd.conf'))
 
-print("<END OF TEST>".center(69, '-'))
+print('<END OF TEST>'.center(69, '-'))

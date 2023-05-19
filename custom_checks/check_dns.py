@@ -5,7 +5,7 @@ from core import run_check_wrapper
 
 
 @run_check_wrapper
-def check_dns(servers: str):
+def check_dns(servers):
     alive_servers = []
     bad_servers = []
     stdout = ''
