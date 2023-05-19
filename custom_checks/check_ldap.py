@@ -34,7 +34,7 @@ def check_ldap(password, servers, container, base, filter):
             print('localhost has been discovered')
             continue
         try:
-            ldapsearch_args = '-w {} -H {} -D "{}" -b "{}" "({})"'.format(
+            ldapsearch_args = '-l 5 -w {} -H {} -D "{}" -b "{}" "({})"'.format(
                 password,
                 server,
                 container,
