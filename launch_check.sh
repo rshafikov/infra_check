@@ -888,4 +888,12 @@ fi
 EOF
 
 chmod 775 ./ini.sh
+
+cat << 'EOF' > ./16.ini
+[16]
+EOF
+
+cat << 'EOF' > ./17.ini
+[17]
+EOF
 source pars.sh
