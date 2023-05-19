@@ -28,7 +28,7 @@ def parse_data():
             lines = [line for line in file]
     ntp_servers = [line.split()[1] for line in lines if line.startswith('NTP')]
     dns_servers = {
-        'dns': line.split()[1] for line in lines if line.startswith('DNS')}
+        'dns': [line.split()[1] for line in lines if line.startswith('DNS')]}
     ldap_ipa = [line.split()[2:] for line in lines if line.startswith(
             'Keystone FreeIpa')]
     dhcp_servers = [line.split()[2] for line in lines if line.startswith(
