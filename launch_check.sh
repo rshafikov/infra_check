@@ -4,9 +4,12 @@ cat << 'EOF' > ./pars.sh
 #!/bin/bash
 echo -e "########\e[31m Проверка пакетов для работы скрипта\e[0m########"
 source check_pack.sh
+source ini.sh
 echo -e "########\e[31m 1 Настройки файла initrc_\e[0m########"
+export "pars"
+export "pars2"
 LOG0=/tmp/log0
-FILE_NAME="/var/www/html/stable/astra/1.6/initrc_"
+FILE_NAME="$pars"
 export set_pwd="$PWD"
 if [ -e "$FILE_NAME" ];then
 ###
@@ -131,7 +134,7 @@ cat << 'EOF' > ./pars2.sh
 #!/bin/bash
 echo -e "########\e[31m 2 Настройки файла initrc_2\e[0m########"
 LOG0=/tmp/log00
-FILE_NAME="/var/www/html/stable/astra/1.6/initrc_2"
+FILE_NAME="$pars2"
 if [ -e "$FILE_NAME" ];then
 ###
 function search(){
