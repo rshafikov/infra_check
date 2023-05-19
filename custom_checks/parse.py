@@ -27,7 +27,8 @@ def parse_data():
         with open('endpars', 'r') as file:
             lines = [line for line in file]
     ntp_servers = [line.split()[1] for line in lines if line.startswith('NTP')]
-    dns_servers = {'dns': line.split()[1] for line in lines if line.startswith('DNS')}
+    dns_servers = {
+        'dns': line.split()[1] for line in lines if line.startswith('DNS')}
     ldap_ipa = [line.split()[2:] for line in lines if line.startswith(
             'Keystone FreeIpa')]
     dhcp_servers = [line.split()[2] for line in lines if line.startswith(
@@ -116,7 +117,7 @@ print(check_san(san_servers))
 print('<MTU>'.center(69, '-'))
 print(dns_servers.get('dns', ['localhost'])[0])
 print(check_mtu(destination_server=dns_servers.get('dns', ['localhost'])[0],
-    max_size=mtu.get('mtu', 1500)))
+                max_size=mtu.get('mtu', 1500)))
 
 print("<MAC's>".center(69, '-'))
 print(check_macs(directory='/etc/dhcp/dhcpd.conf'))
