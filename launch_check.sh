@@ -778,7 +778,6 @@ function find_end() {
 log=$1
 module=$2
   python3 "$module" | tee endtest &
-    wait
    # grep 'OK' "$log" | sed -e 's/OK/\x1b[32m&\x1b[0m/g' -e "s/$/ \x1b[33m$date\x1b[0m/"
     #  grep 'ERROR' "$log" | sed -e 's/ERROR/\x1b[31m&\x1b[0m/g' -e "s/$/ \x1b[33m$date\x1b[0m/"
 }
