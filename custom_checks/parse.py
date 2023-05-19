@@ -115,7 +115,7 @@ print('<SAN>'.center(69, '-'))
 print(check_san(san_servers))
 
 print('<MTU>'.center(69, '-'))
-print(check_mtu(destination_server=dns_servers.get('dns', ['localhost'])[0],
+print(check_mtu(destination_server=dns_servers.get('dns', 'localhost'),
                 max_size=mtu.get('mtu', 1500)))
 
 print("<MAC's>".center(69, '-'))

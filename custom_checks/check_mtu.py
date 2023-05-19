@@ -4,7 +4,12 @@ from core import run_check_wrapper
 
 
 @run_check_wrapper
-def check_mtu(destination_server='localhost', max_size=1500, step=100):
+def check_mtu(destination_server, max_size=1500, step=100):
+    try:
+        destination_server = destination_server[0]
+    except:
+        destination_server = 'localhost'
+
     max_size = int(max_size)
     step = int(step)
     print('DO NOT FORGET: THERE IS 28 BYTES HEADER IN MTU PACKAGE!')
