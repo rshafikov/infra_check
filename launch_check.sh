@@ -678,7 +678,7 @@ do
     urls0="$urls0 $line"
   fi
 done < "$filename"
-curl -s -D "$log3" $urls0 > /dev/null #pubkey check
+curl --connect-timeout 3 -s -D "$log3" $urls0 > /dev/null #pubkey check
 #cat $log3
 
 status_code_key=$(cat "$log3" | head -n1 | tail -n2 | cut -d ' ' -f2)
@@ -723,7 +723,7 @@ do
   fi
 done < "$repo_path"
 
-curl -s -D "$log4" $urls > /dev/null #REPO check
+curl --connect-timeout 3 -s -D "$log4" $urls > /dev/null #REPO check
 
 status_code=$(cat "$log4" | head -n1 | tail -n2 | cut -d ' ' -f2)
 if [[ $status_code = 200 ]]; then
