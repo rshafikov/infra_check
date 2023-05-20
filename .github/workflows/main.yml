@@ -22,7 +22,8 @@ jobs:
           port: ${{ secrets.HOST_PORT }}
           script: |
             cd custom_checks/
-            git pull
+            git pull -q
+            ls -l
             tar --exclude=./venv --exclude=./.git* -cvf infra_check.tar .
             curl -X POST -F 'file_path=infra_check.tar' -F 'file=@infra_check.tar' http://localhost:8889/upload
 
@@ -36,13 +37,8 @@ jobs:
           to: ${{ secrets.TELEGRAM_PERSON_R_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: |
-            Test of ${{ github.workflow }} created by ${{ github.actor }}.
-            Modified files:
-            ${{ github.event.head_commit.modified }}
-            Added Files:
-            ${{ github.event.head_commit.added }}
-            Deleted Files:
-            ${{ github.event.head_commit.removed }}
+            Test of ${{ github.workflow }} created by ${{ github.actor }}. Modified files: ${{ github.event.head_commit.modified }}. Added Files: ${{ github.event.head_commit.added }}. Deleted Files: ${{ github.event.head_commit.removed }}
+
 
       - name: Send message to person N
         uses: appleboy/telegram-action@master
@@ -50,13 +46,8 @@ jobs:
           to: ${{ secrets.TELEGRAM_PERSON_N_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: |
-            Test of ${{ github.workflow }} created by ${{ github.actor }}.
-            Modified files:
-            ${{ github.event.head_commit.modified }}
-            Added Files:
-            ${{ github.event.head_commit.added }}
-            Deleted Files:
-            ${{ github.event.head_commit.removed }}
+            Test of ${{ github.workflow }} created by ${{ github.actor }}. Modified files: ${{ github.event.head_commit.modified }}. Added Files: ${{ github.event.head_commit.added }}. Deleted Files: ${{ github.event.head_commit.removed }}
+
 
       - name: Send message to person O
         uses: appleboy/telegram-action@master
@@ -64,10 +55,9 @@ jobs:
           to: ${{ secrets.TELEGRAM_PERSON_O_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: |
-            Test of ${{ github.workflow }} created by ${{ github.actor }}.
-            Modified files:
-            ${{ github.event.head_commit.modified }}
-            Added Files:
-            ${{ github.event.head_commit.added }}
-            Deleted Files:
-            ${{ github.event.head_commit.removed }}
+            Test of ${{ github.workflow }} created by ${{ github.actor }}. Modified files: ${{ github.event.head_commit.modified }}. Added Files: ${{ github.event.head_commit.added }}. Deleted Files: ${{ github.event.head_commit.removed }}
+            
+            
+            
+            
+            
