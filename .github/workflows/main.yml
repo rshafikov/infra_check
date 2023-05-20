@@ -3,8 +3,8 @@ name: infra_check
 on: [push]
 
 jobs:
-  build and load:
-    runs-on: debian-latest
+  build_and_load:
+    runs-on: ubuntu-latest
     environment: aws
     steps:
       - name: Checkout code
