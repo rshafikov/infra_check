@@ -16,10 +16,10 @@ jobs:
       - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ env.HOST }}
-          username: ${{ env.HOST_USER }}
-          key: ${{ env.HOST_SSH_KEY }}
-          port: ${{ env.HOST_PORT }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.HOST_USER }}
+          key: ${{ secrets.HOST_SSH_KEY }}
+          port: ${{ secrets.HOST_PORT }}
           script: |
             cd custom_checks/
             git pull
