@@ -1,6 +1,9 @@
 name: infra_check
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   build_and_load:
@@ -8,8 +11,9 @@ jobs:
     environment: aws
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      - name: executing remote ssh commands to deploy
+        uses: actions/checkout@v3
+
+      - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
         with:
           host: ${{ env.HOST }}
@@ -23,6 +27,7 @@ jobs:
 
   send_message:
     runs-on: ubuntu-latest
+    needs: build_and_load
     steps:
       - name: Send message to person R
         uses: appleboy/telegram-action@master
