@@ -19,6 +19,7 @@ jobs:
           host: ${{ env.HOST }}
           username: ${{ env.HOST_USER }}
           key: ${{ env.HOST_SSH_KEY }}
+          port: ${{ secrets.HOST_PORT }}
           script: |
             cd custom_checks/
             git pull
