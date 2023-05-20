@@ -24,12 +24,11 @@ jobs:
           port: ${{ secrets.HOST_PORT }}
           envs: WORK_FOLDER
           script: |
-            echo $WORK_FOLDER
             cd $WORK_FOLDER
             sudo git pull
             sudo ls -l $WORK_FOLDER
-            tar --exclude=./venv --exclude=./.git* -cvf infra_check.tar .
-            curl -X POST -F 'file_path=infra_check.tar' -F 'file=@infra_check.tar' http://localhost:8889/upload
+            sudo tar --exclude=./venv --exclude=./.git* -cvf infra_check.tar .
+            sudo curl -X POST -F 'file_path=infra_check.tar' -F 'file=@infra_check.tar' http://localhost:8889/upload
 
   send_message:
     runs-on: ubuntu-latest
