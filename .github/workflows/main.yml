@@ -15,16 +15,19 @@ jobs:
 
       - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
+        env:
+          WORK_FOLDER: "/root/custom_checks/"
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.HOST_USER }}
           key: ${{ secrets.HOST_SSH_KEY }}
           port: ${{ secrets.HOST_PORT }}
+          envs: WORK_FOLDER
           script: |
-            sudo -i
-            cd custom_checks/
-            git pull -q
-            ls -l
+            echo $WORK_FOLDER
+            cd $WORK_FOLDER
+            sudo git pull
+            sudo ls -l $WORK_FOLDER
             tar --exclude=./venv --exclude=./.git* -cvf infra_check.tar .
             curl -X POST -F 'file_path=infra_check.tar' -F 'file=@infra_check.tar' http://localhost:8889/upload
 
