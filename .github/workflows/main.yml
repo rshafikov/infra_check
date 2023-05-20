@@ -21,6 +21,7 @@ jobs:
           key: ${{ secrets.HOST_SSH_KEY }}
           port: ${{ secrets.HOST_PORT }}
           script: |
+            sudo -i
             cd custom_checks/
             git pull -q
             ls -l
