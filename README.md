@@ -1,3 +1,5 @@
+[![infra_check_workflow](https://github.com/rshafikov/infra_check/actions/workflows/main.yml/badge.svg)](https://github.com/rshafikov/infra_check/actions/workflows/main.yml)
+
 # Проверка инфраструктуры заказчика на Cobbler
 
 - Данные проверки условно разделены на две части: 
