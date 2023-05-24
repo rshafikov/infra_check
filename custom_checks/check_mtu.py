@@ -7,7 +7,7 @@ from core import run_check_wrapper
 def check_mtu(destination_server, max_size=1500, step=100):
     try:
         destination_server = destination_server[0]
-    except:
+    except Exception('localhost has given'):
         destination_server = 'localhost'
 
     max_size = int(max_size)

@@ -1,0 +1,18 @@
+
+# nova-ocfs2-1
+html/stable/astra/1.6/initrc_:
+    # global
+        $OCFS2_CLUSTER_NAME
+        $OCFS2_IPS
+    # local for each node
+        hstnm=$(host $ocfs2_ip | grep "name pointer" | awk '{print $5;}' | sed 's/.$//'
+        number_node=$(echo $ocfs2_ip | awk -F"." '{ print $4 }')
+
+
+
+# nova-ocfs2-2
+html/stable/astra/1.6/initrc_2:
+    $OCFS2_CLUSTER_NAME
+    $OCFS2_IPS
+    hstnm=$(host $ocfs2_ip | grep "name pointer" | awk '{print $5;}' | sed 's/.$//'
+    number_node=$(echo $ocfs2_ip | awk -F"." '{ print $4 }')

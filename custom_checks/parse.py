@@ -1,13 +1,13 @@
 import subprocess
 import time
 
-from check_ntp import check_ntp
+from check_context_without_comments import search_cyrillic
 from check_dns import check_dns
 from check_ldap import check_ldap
-from check_context_without_comments import search_cyrillic
-from check_san import check_san
-from check_mtu import check_mtu
 from check_macs import check_macs
+from check_mtu import check_mtu
+from check_ntp import check_ntp
+from check_san import check_san
 from core import logging, run_check_wrapper
 
 

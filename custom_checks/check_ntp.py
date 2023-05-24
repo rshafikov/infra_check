@@ -1,8 +1,8 @@
-from socket import AF_INET, SOCK_DGRAM
-import sys
 import socket
 import struct
+import sys
 import time
+from socket import AF_INET, SOCK_DGRAM
 
 from core import run_check_wrapper
 

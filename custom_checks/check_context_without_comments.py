@@ -1,5 +1,5 @@
-import os
 import glob
+import os
 
 from core import run_check_wrapper
 
@@ -39,7 +39,9 @@ def search_cyrillic(cobbler_directory='./'):
                                 break
                             if '\u0400' <= char <= '\u04FF':
                                 cyrillic_word = ''
-                                while '\u0400' <= line[char_number] <= '\u04FF' or line[char_number] == ' ':
+                                while (
+                                        '\u0400' <= line[char_number]) <= (
+                                        '\u04FF' or line[char_number] == ' '):
                                     cyrillic_word += line[char_number]
                                     char_number += 1
                                 print(
@@ -62,7 +64,7 @@ def search_cyrillic(cobbler_directory='./'):
 
 
 def main():
-    search_cyrillic('/Users/rshafikov/Desktop/_work/modulo/fake_cobbler/')
+    search_cyrillic('/Users/rshafikov/Desktop/_work/modulo/cobller/html/')
 
 
 if __name__ == '__main__':

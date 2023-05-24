@@ -1,8 +1,8 @@
-from scapy.all import sniff, Ether, IP, UDP
-import time
 import json
+import time
 
 from core import run_check_wrapper
+from scapy.all import IP, UDP, Ether, sniff
 
 
 def packet_handler(packet):
