@@ -26,7 +26,7 @@ jobs:
         run: |
           for file in ${{ steps.changed-files.outputs.all_modified_files }}; do
             echo "$file was changed"
-          done > $GIT_MODIFIED_FILES_LIST
+          done > "{$GIT_MODIFIED_FILES_LIST}"
 
       - name: Send message to person R
         uses: appleboy/telegram-action@master
