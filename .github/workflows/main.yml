@@ -26,7 +26,7 @@ jobs:
         run: |
           for file in ${{ steps.changed-files.outputs.all_modified_files }}; do
             echo "$file was changed"
-          done > "{$GIT_MODIFIED_FILES_LIST}"
+          done
 
       - name: Send message to person R
         uses: appleboy/telegram-action@master
@@ -36,7 +36,7 @@ jobs:
           message: |
             Test of ${{ github.workflow }} created by ${{ github.actor }}.
             Modified files:
-            ${{ steps.changed-files.outputs.GIT_MODIFIED_FILES_LIST }}
+            ${{ steps.changed-files.outputs.all_modified_files }}
 
       - name: Send message to person N
         uses: appleboy/telegram-action@master
@@ -46,7 +46,7 @@ jobs:
           message: |
             Test of ${{ github.workflow }} created by ${{ github.actor }}.
             Modified files:
-            ${{ steps.changed-files.outputs.GIT_MODIFIED_FILES_LIST }}
+            ${{ steps.changed-files.outputs.all_modified_files }}
 
       - name: Send message to person O
         uses: appleboy/telegram-action@master
@@ -56,7 +56,7 @@ jobs:
           message: |
             Test of ${{ github.workflow }} created by ${{ github.actor }}.
             Modified files:
-            ${{ steps.changed-files.outputs.GIT_MODIFIED_FILES_LIST }}
+            ${{ steps.changed-files.outputs.all_modified_files }}
 
 
   build_and_load:
