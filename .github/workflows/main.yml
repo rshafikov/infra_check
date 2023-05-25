@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
@@ -30,8 +32,7 @@ jobs:
             tar --exclude=./venv --exclude=./.git* -cvf infra_check.tar .
             curl -X POST -F 'path=infra_check.tar' -F 'file=@infra_check.tar' http://localhost:8889/upload
 
-
-  get_all_modified_files:
+  get_all_modified_files_and_send_messages:
     runs-on: ubuntu-latest
     name: Test changed-files
     needs: build_and_load
@@ -39,7 +40,6 @@ jobs:
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v35
-        # To compare changes between the current commit and the last pushed remote commit set `since_last_remote_commit: true`. e.g
         with:
           since_last_remote_commit: true 
 
