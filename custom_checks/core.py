@@ -1,7 +1,8 @@
+import fnmatch
 import logging
-from functools import wraps
+import os
 import subprocess
-
+from functools import wraps
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -34,12 +35,20 @@ def get_value_from_file(value, path):
     except FileNotFoundError:
         return 'There is no file with this path: {}'.format(path)
 
-    return '\n'.join([line for line in lines if value in line])
+    return ''.join([line for line in lines if value in line])
 
 
 @run_check_wrapper
 def get_value_from_env(value, path):
     cmd = 'source {} && env | grep {}'.format(path, value)
-    check_value = run_check_wrapper(subprocess.getoutput)
-    value = check_value(cmd)
-    return value
+    return subprocess.getoutput(cmd)
+
+
+@run_check_wrapper
+def find_file_by_pattern(pattern, path):
+    result = []
+    for root, _, files in os.walk(path):
+        for name in files:
+            if fnmatch.fnmatch(name, pattern):
+                result.append(os.path.join(root, name))
+    return result
