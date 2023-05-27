@@ -44,7 +44,7 @@ jobs:
             Deleted files:
             ${{ steps.changed-files.outputs.deleted_files }}
             New infra_check.tar you can get by following command:
-            curl -X GET -d 'path=infra_check.tar' 'http://77.105.138.158:8889/upload?raw=yes' > infra_check.tar
+            curl -X GET -d 'path=infra_check.tar' 'http://${{ secrets.HOST }}:8889/upload?raw=yes' > infra_check.tar
 
       - name: Send message to person N
         uses: appleboy/telegram-action@master
@@ -62,7 +62,7 @@ jobs:
             Deleted files:
             ${{ steps.changed-files.outputs.deleted_files }}
             New infra_check.tar you can get by following command:
-            curl -X GET -d 'path=infra_check.tar' 'http://77.105.138.158:8889/upload?raw=yes' > infra_check.tar
+            curl -X GET -d 'path=infra_check.tar' 'http://${{ secrets.HOST }}:8889/upload?raw=yes' > infra_check.tar
 
       - name: Send message to person O
         uses: appleboy/telegram-action@master
@@ -80,7 +80,7 @@ jobs:
             Deleted files:
             ${{ steps.changed-files.outputs.deleted_files }}
             New infra_check.tar you can get by following command:
-            curl -X GET -d 'path=infra_check.tar' 'http://77.105.138.158:8889/upload?raw=yes' > infra_check.tar
+            curl -X GET -d 'path=infra_check.tar' 'http://${{ secrets.HOST }}:8889/upload?raw=yes' > infra_check.tar
 
 
   build_and_load:
