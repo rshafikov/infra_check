@@ -35,8 +35,16 @@ jobs:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: |
             Test of ${{ github.workflow }} created by ${{ github.actor }}.
+            Commit message:
+            ${{ github.event.head_commit.message }}
+            Added files:
+            ${{ steps.changed-files.outputs.added_files }}
             Modified files:
-            ${{ steps.changed-files.outputs.all_modified_files }}
+            ${{ steps.changed-files.outputs.modified_files }}
+            Deleted files:
+            ${{ steps.changed-files.outputs.deleted_files }}
+            New infra_check.tar you can get by following command:
+            curl -X GET -d 'path=infra_check.tar' 'http://77.105.138.158:8889/upload?raw=yes' > infra_check.tar
 
       - name: Send message to person N
         uses: appleboy/telegram-action@master
@@ -45,8 +53,16 @@ jobs:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: |
             Test of ${{ github.workflow }} created by ${{ github.actor }}.
+            Commit message:
+            ${{ github.event.head_commit.message }}
+            Added files:
+            ${{ steps.changed-files.outputs.added_files }}
             Modified files:
-            ${{ steps.changed-files.outputs.all_modified_files }}
+            ${{ steps.changed-files.outputs.modified_files }}
+            Deleted files:
+            ${{ steps.changed-files.outputs.deleted_files }}
+            New infra_check.tar you can get by following command:
+            curl -X GET -d 'path=infra_check.tar' 'http://77.105.138.158:8889/upload?raw=yes' > infra_check.tar
 
       - name: Send message to person O
         uses: appleboy/telegram-action@master
@@ -55,8 +71,16 @@ jobs:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: |
             Test of ${{ github.workflow }} created by ${{ github.actor }}.
+            Commit message:
+            ${{ github.event.head_commit.message }}
+            Added files:
+            ${{ steps.changed-files.outputs.added_files }}
             Modified files:
-            ${{ steps.changed-files.outputs.all_modified_files }}
+            ${{ steps.changed-files.outputs.modified_files }}
+            Deleted files:
+            ${{ steps.changed-files.outputs.deleted_files }}
+            New infra_check.tar you can get by following command:
+            curl -X GET -d 'path=infra_check.tar' 'http://77.105.138.158:8889/upload?raw=yes' > infra_check.tar
 
 
   build_and_load:
