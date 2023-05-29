@@ -1,8 +1,9 @@
 import json
 import time
 
-from core import run_check_wrapper
 from scapy.all import IP, UDP, Ether, sniff
+
+from core import run_check_wrapper, save_to_file
 
 
 def packet_handler(packet):
@@ -15,7 +16,7 @@ def packet_handler(packet):
         udp_dport = packet[UDP].dport
         dhcp_info = packet.summary().split('/')[-1].strip()
         iface = packet.sniffed_on
-        dict_represent = {
+        return {
             "iface": '{}'.format(iface),
             "message_type": dhcp_info,
             "source": ip_src,
@@ -26,7 +27,6 @@ def packet_handler(packet):
             "preview": 'source ({}:{}) -> dest ({}:{})'.format(
                 ip_src, udp_sport, ip_dst, udp_dport)
         }
-        return dict_represent
 
     except Exception as e:
         return e
@@ -34,19 +34,21 @@ def packet_handler(packet):
 
 @run_check_wrapper
 def listen_dhcp_msg():
+    stdout = ''
     filter_expr = "port 67 or port 68"
-    print('sniff_start_time: ' + time.strftime("%I:%M:%S"))
+    stdout += ('sniff_start_time: ' + time.strftime("%I:%M:%S"))
     result = sniff(filter=filter_expr, timeout=20)
     output = [packet_handler(packet) for packet in result]
     dhcp_servers = [
         p['source'] for p in output if p['message_type'] == 'DHCP Ack']
-    print('\n'.join([json.dumps(p, indent=4) for p in output]))
-    print('{}\n'.format(result)[1:-1])
-    print(
+    stdout += ('\n'.join([json.dumps(p, indent=4) for p in output]))
+    stdout += ('{}\n'.format(result)[1:-1])
+    stdout += (
         'Available {} DHCP: {}'.format(
             len(set(dhcp_servers)), set(dhcp_servers)))
-    print('sniff_end_time: ' + time.strftime("%I:%M:%S"))
+    stdout += ('sniff_end_time: ' + time.strftime("%I:%M:%S"))
+    return stdout
 
 
 if __name__ == '__main__':
-    listen_dhcp_msg()
+    save_to_file(listen_dhcp_msg())

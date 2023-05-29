@@ -52,3 +52,9 @@ def find_file_by_pattern(pattern, path):
             if fnmatch.fnmatch(name, pattern):
                 result.append(os.path.join(root, name))
     return result
+
+
+def save_to_file(content, path='endtest.txt'):
+    print(content)
+    with open(path, 'a') as file:
+        file.write(content + '\n')
