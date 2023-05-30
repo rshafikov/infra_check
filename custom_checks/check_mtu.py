@@ -23,14 +23,10 @@ def check_mtu(destination_server, max_size=1500, step=100):
     for size in range(max_size, 0, -step):
         ping = subprocess.run(
             ['ping',
-             '-c',
-             '1',
-             '-s',
-             str(size - 28),
-             '-M',
-             'do',
-             '-W',
-             '1',
+             '-c', '1',
+             '-s', str(size - 28),
+             '-M', 'do',
+             '-W', '1',
              destination_server],
             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         output = ping.stdout.decode('utf-8')

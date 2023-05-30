@@ -728,10 +728,10 @@ curl --connect-timeout 3 -s -D "$log4" $urls > /dev/null #REPO check
 status_code=$(cat "$log4" | head -n1 | tail -n2 | cut -d ' ' -f2)
 if [[ $status_code = 200 ]]; then
  echo -e "\e[32mOK \e[0m REPO  \e[33m$date\e[0m"
-echo  "OK REPO $date" >> endtest
+echo  "OK REPO $date" >> endtest.txt
 else
    echo -e "\e[31mERROR \e[0m REPO  $urls \e[33m$date\e[0m"
- echo  "ERROR REPO  $urls $date" >> endtest
+ echo  "ERROR REPO  $urls $date" >> endtest.txt
 
 fi
 }

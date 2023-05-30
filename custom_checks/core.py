@@ -40,7 +40,7 @@ def get_value_from_file(value, path):
 
 @run_check_wrapper
 def get_value_from_env(value, path):
-    cmd = 'source {} && env | grep {}'.format(path, value)
+    cmd = '. {} && env | grep {}'.format(path, value)
     return subprocess.getoutput(cmd)
 
 
