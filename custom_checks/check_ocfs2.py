@@ -15,10 +15,10 @@ def generate_fake_region():
 @run_check_wrapper
 def get_list_of_hostnames(initrc, ocfs_config, hosti_id=0):
     cmd = (
-        """
-            source {}
+        '''
+            . {}
             i=1
-            {}
+            {};
             do
                 if [ $i -gt "9" ];then
                     numi=$i
@@ -28,12 +28,13 @@ def get_list_of_hostnames(initrc, ocfs_config, hosti_id=0):
             echo {}
             let i=$i+1
             done
-        """.format(
+        '''.format(
             initrc,
             ocfs_config['$hosti'][hosti_id],
             ocfs_config['NODE_FULL_PATTERN'])
     )
-    return subprocess.getoutput(cmd)
+    return subprocess.run(
+        ['bash', '-c', cmd], capture_output=True, text=True).stdout
 
 
 @run_check_wrapper
@@ -53,7 +54,7 @@ def parse_dns_record_pattern(bind9_path):
 
 @run_check_wrapper
 def print_config(initrc, ocfs_config):
-    stdout = ''
+    stdout = 'OCFS2_CLUSTER by {}\n'.format(initrc)
     list_of_hosts = ocfs_config['$OCFS2_IPS']
     cluster_name = ocfs_config['$OCFS2_CLUSTER_NAME']
     stdout += (

@@ -31,7 +31,7 @@ def check_ldap(password, servers, container, base, filter):
     stdout = ''
     for server in servers:
         if server.startswith('ldap://127.0'):
-            print('localhost has been discovered')
+            stdout += 'localhost has been discovered\n'
             continue
         try:
             ldapsearch_args = '-l 5 -w {} -H {} -D "{}" -b "{}" "({})"'.format(

@@ -1,7 +1,7 @@
 import json
 import subprocess
 
-from core import run_check_wrapper
+from core import run_check_wrapper, save_to_file
 
 
 @run_check_wrapper
@@ -13,7 +13,7 @@ def check_mtu(destination_server, max_size=1500, step=100):
 
     max_size = int(max_size)
     step = int(step)
-    print('DO NOT FORGET: THERE IS 28 BYTES HEADER IN MTU PACKAGE!')
+    save_to_file('DO NOT FORGET: THERE IS 28 BYTES HEADER IN MTU PACKAGE!')
     mtu_dict = {
         'DESTINATION': destination_server,
         'OK': [],
