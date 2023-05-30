@@ -44,9 +44,9 @@ def check_ldap(password, servers, container, base, filter):
             result = subprocess.getoutput(
                 ldapsearch_command + ldapsearch_args).split()
             if 'numEntries:' in result:
-                numEntries = [result[i + 1] for i in range(
+                num_entries = [result[i + 1] for i in range(
                     len(result)) if result[i] == 'numEntries:']
-                if int(numEntries[0]) > 1:
+                if int(num_entries[0]) > 1:
                     alive_servers.append(server)
                     continue
             stdout += 'LDAP {} is NOT available\n'.format(server)

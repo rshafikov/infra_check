@@ -2,17 +2,8 @@ import json
 import random
 import string
 
-from core import (get_value_from_env, get_value_from_file, run_check_wrapper,
-                  subprocess)
-
-INITRC_ = ('/Users/rshafikov/Desktop/_work/modulo'
-           '/cobbler/html/stable/astra/1.6/initrc_')
-
-INITRC_2 = ('/Users/rshafikov/Desktop/_work/modulo'
-            '/cobbler/html/stable/astra/1.6/initrc_2')
-
-BIND9 = ('/Users/rshafikov/Desktop/_work/modulo'
-         '/cobbler/html/stable/astra/1.6/install_bind9')
+from core import (find_file_by_pattern, get_value_from_env,
+                  get_value_from_file, run_check_wrapper, subprocess)
 
 
 @run_check_wrapper
@@ -113,7 +104,7 @@ def check_ocfs2(initrc, bind9_path):
         s for s in net_up if 'NET' in s).split('=')[1]
     (node_full_pattern,
      node_name_pattern,
-     node_ip_pattern) = parse_dns_record_pattern(BIND9)
+     node_ip_pattern) = parse_dns_record_pattern(bind9_path)
     hosti_range = get_value_from_file(
         'for hosti', bind9_path).split('\n')
     ocfs_config.update({
@@ -134,13 +125,17 @@ def check_ocfs2(initrc, bind9_path):
 
 
 def main():
-    ocfs_config_1 = check_ocfs2(INITRC_, BIND9)
+    path = input('Enter firstboot path:\n')
+    initrc_ = find_file_by_pattern('initrc_', path)
+    initrc_2 = find_file_by_pattern('initrc_2', path)
+    bind9 = find_file_by_pattern('install_bind9', path)
+    ocfs_config_1 = check_ocfs2(initrc_, bind9)
     print(json.dumps(ocfs_config_1, indent=4))
-    print(print_config(INITRC_, ocfs_config_1))
+    print(print_config(initrc_, ocfs_config_1))
 
-    ocfs_config_2 = check_ocfs2(INITRC_2, BIND9)
+    ocfs_config_2 = check_ocfs2(initrc_2, bind9)
     print(json.dumps(ocfs_config_2, indent=4))
-    print(print_config(INITRC_2, ocfs_config_2))
+    print(print_config(initrc_2, ocfs_config_2))
 
 
 if __name__ == '__main__':

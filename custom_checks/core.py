@@ -51,10 +51,14 @@ def find_file_by_pattern(pattern, path):
         for name in files:
             if fnmatch.fnmatch(name, pattern):
                 result.append(os.path.join(root, name))
-    return result
+    if result != []:
+
+        return ''.join(result[0])
+
+    raise FileNotFoundError
 
 
-def save_to_file(content, path='endtest.txt'):
+def save_to_file(content='error: no content', path='endtest.txt'):
     print(content)
     with open(path, 'a') as file:
         file.write(content + '\n')

@@ -1,3 +1,4 @@
+import json
 import subprocess
 
 from core import run_check_wrapper
@@ -40,7 +41,7 @@ def check_mtu(destination_server, max_size=1500, step=100):
     if mtu_dict['OK'] == [] and mtu_dict['FAILED'] == []:
         raise Exception('ZERO PINGS! TRY TO CHECK DESTINATION SERVER')
 
-    return mtu_dict
+    return json.dumps(mtu_dict, indent=4)
 
 
 def main():

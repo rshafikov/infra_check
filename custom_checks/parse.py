@@ -129,8 +129,8 @@ save_to_file(check_macs(directory='/etc/dhcp/dhcpd.conf'))
 
 save_to_file("<OCFS2_CONF>".center(69, '-'))
 INITRC_, INITRC_2, BIND9 = (
-    find_file_by_pattern('INITRC_', INITRC_DIR),
-    find_file_by_pattern('INITRC_2', INITRC_DIR),
+    find_file_by_pattern('initrc_', INITRC_DIR),
+    find_file_by_pattern('initrc_2', INITRC_DIR),
     find_file_by_pattern('install_bind9', INITRC_DIR)
 )
 ocfs_config_1 = check_ocfs2(INITRC_, BIND9)

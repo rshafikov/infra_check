@@ -1,9 +1,8 @@
 import json
 import time
 
-from scapy.all import IP, UDP, Ether, sniff
-
 from core import run_check_wrapper, save_to_file
+from scapy.all import IP, UDP, Ether, sniff
 
 
 def packet_handler(packet):
@@ -36,17 +35,17 @@ def packet_handler(packet):
 def listen_dhcp_msg():
     stdout = ''
     filter_expr = "port 67 or port 68"
-    stdout += ('sniff_start_time: ' + time.strftime("%I:%M:%S"))
+    stdout += ('sniff_start_time: ' + time.strftime("%I:%M:%S") + '\n')
     result = sniff(filter=filter_expr, timeout=20)
     output = [packet_handler(packet) for packet in result]
     dhcp_servers = [
         p['source'] for p in output if p['message_type'] == 'DHCP Ack']
-    stdout += ('\n'.join([json.dumps(p, indent=4) for p in output]))
+    stdout += ('\n'.join([json.dumps(p, indent=4) for p in output]) + '\n')
     stdout += ('{}\n'.format(result)[1:-1])
     stdout += (
-        'Available {} DHCP: {}'.format(
+        '\nAvailable {} DHCP: {}'.format(
             len(set(dhcp_servers)), set(dhcp_servers)))
-    stdout += ('sniff_end_time: ' + time.strftime("%I:%M:%S"))
+    stdout += '\nsniff_end_time: ' + time.strftime("%I:%M:%S")
     return stdout
 
 
