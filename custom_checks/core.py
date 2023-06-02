@@ -6,7 +6,7 @@ from functools import wraps
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
-    filename='checks.log',
+    filename='/var/log/infra_check.log',
     filemode='a',
     level=logging.INFO
 )
