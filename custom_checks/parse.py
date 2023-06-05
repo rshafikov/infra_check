@@ -7,7 +7,7 @@ from check_ldap import check_ldap
 from check_macs import check_macs
 from check_mtu import check_mtu
 from check_ntp import check_ntp
-from check_ocfs2 import check_ocfs2, print_config
+from check_ocfs2 import check_cluster
 from check_san import check_san
 from core import find_file_by_pattern, logging, run_check_wrapper, save_to_file
 
@@ -133,9 +133,7 @@ INITRC_, INITRC_2, BIND9 = (
     find_file_by_pattern('initrc_2', INITRC_DIR),
     find_file_by_pattern('install_bind9', INITRC_DIR)
 )
-ocfs_config_1 = check_ocfs2(INITRC_, BIND9)
-save_to_file(print_config(INITRC_, ocfs_config_1))
-ocfs_config_2 = check_ocfs2(INITRC_2, BIND9)
-save_to_file(print_config(INITRC_2, ocfs_config_2))
+check_cluster(INITRC_, BIND9)
+check_cluster(INITRC_2, BIND9)
 
 save_to_file('<END OF TEST>'.center(69, '-'))

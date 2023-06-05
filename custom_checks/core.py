@@ -2,6 +2,7 @@ import fnmatch
 import logging
 import os
 import subprocess
+import traceback
 from functools import wraps
 
 logging.basicConfig(
@@ -20,7 +21,8 @@ def run_check_wrapper(func):
             return func(*args, **kwargs)
         except Exception as error:
             logging.error(('There is an error with {}'.format(func.__name__),
-                           'Full error: {}'.format(error)))
+                           'Error: {}'.format(error),
+                           'Full error: {}'.format(traceback.format_exc())))
             return 'There is an error with {}'.format(func.__name__)
 
     return wrapper

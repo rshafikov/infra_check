@@ -3,7 +3,8 @@ import random
 import string
 
 from core import (find_file_by_pattern, get_value_from_env,
-                  get_value_from_file, run_check_wrapper, subprocess)
+                  get_value_from_file, run_check_wrapper, save_to_file,
+                  subprocess)
 
 
 @run_check_wrapper
@@ -123,6 +124,12 @@ def check_ocfs2(initrc, bind9_path):
     ocfs_config.update(
         {'NODE_HOSTNAME_LIST': [h for h in list_of_hostnames]})
     return ocfs_config
+
+
+@run_check_wrapper
+def check_cluster(initrc_, bind9):
+    ocfs_config = check_ocfs2(initrc_, bind9)
+    save_to_file(print_config(initrc_, ocfs_config))
 
 
 def main():
