@@ -43,7 +43,7 @@ jobs:
             ${{ steps.changed-files.outputs.modified_files }}
             Deleted files:
             ${{ steps.changed-files.outputs.deleted_files }}
-            Donwload new __infra_check.tar__ in a browser via link:
+            Download new infra_check.tar in a browser via link:
             http://${{ secrets.HOST }}:8889/upload?path=infra_check.tar&raw=yes
 
       - name: Send message to person N
@@ -61,8 +61,7 @@ jobs:
             ${{ steps.changed-files.outputs.modified_files }}
             Deleted files:
             ${{ steps.changed-files.outputs.deleted_files }}
-            -------------------------------
-            Donwload new __infra_check.tar__ in a browser via link:
+            Donwload new infra_check.tar in a browser via link:
             http://${{ secrets.HOST }}:8889/upload?path=infra_check.tar&raw=yes
 
       - name: Send message to person O
@@ -80,8 +79,7 @@ jobs:
             ${{ steps.changed-files.outputs.modified_files }}
             Deleted files:
             ${{ steps.changed-files.outputs.deleted_files }}
-            -------------------------------
-            Donwload new __infra_check.tar__ in a browser via link:
+            Download new infra_check.tar in a browser via link:
             http://${{ secrets.HOST }}:8889/upload?path=infra_check.tar&raw=yes
 
 
