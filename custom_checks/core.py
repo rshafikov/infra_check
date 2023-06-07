@@ -7,7 +7,8 @@ from functools import wraps
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
-    filename='/var/log/infra_check.log',
+    # filename='/var/log/infra_check.log',
+    filename='infra_check.log',
     filemode='a',
     level=logging.INFO
 )
@@ -53,8 +54,7 @@ def find_file_by_pattern(pattern, path):
         for name in files:
             if fnmatch.fnmatch(name, pattern):
                 result.append(os.path.join(root, name))
-    if result != []:
-
+    if result:
         return ''.join(result[0])
 
     raise FileNotFoundError

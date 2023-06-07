@@ -14,7 +14,8 @@ def generate_fake_region():
 
 
 @run_check_wrapper
-def get_list_of_hostnames(initrc, ocfs_config, hosti_id=0):
+def get_list_of_hostnames(
+    initrc, ocfs_config, cluster_type='hypervisor'):
     cmd = (
         '''
             . {}
@@ -31,7 +32,7 @@ def get_list_of_hostnames(initrc, ocfs_config, hosti_id=0):
             done
         '''.format(
             initrc,
-            ocfs_config['$hosti'][hosti_id],
+            ocfs_config['$hosti'][cluster_type],
             ocfs_config['NODE_FULL_PATTERN'])
     )
     return subprocess.run(
@@ -39,18 +40,24 @@ def get_list_of_hostnames(initrc, ocfs_config, hosti_id=0):
 
 
 @run_check_wrapper
-def parse_dns_record_pattern(bind9_path):
-    exclude_list = ('$REVERSE_IP', 'dbmaster', 'controller')
-    hostname_pattern = get_value_from_file(
+def parse_dns_record_pattern(
+        bind9_path, cluster_type='hypervisor'):
+    hostname_patterns = get_value_from_file(
         'update add', bind9_path).split('\n')[:-1]
-    exclude_list = ('$REVERSE_IP', 'dbmaster', 'controller')
-    node_full_pattern = ''.join(
-        [p for p in hostname_pattern if all(e not in p for e in exclude_list)])
-    node_name_pattern = ''.join(
-        n for n in node_full_pattern.split() if '$CLOUD_ZONE' in n)
-    node_ip_pattern = ''.join(
-        n for n in node_full_pattern.split() if '$NET.$hosti' in n)
-    return node_full_pattern, node_name_pattern, node_ip_pattern
+    pattern_dict = {'full_pattern_list': [
+        p for p in hostname_patterns if '$REVERSE_IP' not in p]
+    }
+    pattern_dict.update({
+       'hypervisor': (pattern_dict.get('full_pattern_list')[0]),
+       'controller': (pattern_dict.get('full_pattern_list')[1]),
+       'dbmaster': (pattern_dict.get('full_pattern_list')[2])
+    })
+    n_full_pattern = pattern_dict.get(cluster_type)
+    n_name_pattern = next(
+        n for n in n_full_pattern.split() if '$CLOUD_ZONE' in n)
+    n_ip_pattern = next(
+        n for n in n_full_pattern.split() if '$NET.$hosti' in n)
+    return n_full_pattern, n_name_pattern, n_ip_pattern
 
 
 @run_check_wrapper
@@ -60,11 +67,10 @@ def print_config(initrc, ocfs_config):
     cluster_name = ocfs_config['$OCFS2_CLUSTER_NAME']
     stdout += (
         'heartbeat:\n'
-        '       pseudo_region = {}\n'
-        '       cluster = {}\n\n'
+        '        pseudo_region = {}\n'
+        '        cluster = {}\n\n'
     ).format(generate_fake_region(), cluster_name)
-    list_of_hostnames = get_list_of_hostnames(
-        initrc, ocfs_config).split('\n')
+    list_of_hostnames = ocfs_config.get('NODE_HOSTNAME_LIST')
     for node_number, node_ip, in enumerate(list_of_hosts, start=1):
         name = ''.join(
             h.split()[2] for h in list_of_hostnames if node_ip in h)
@@ -75,7 +81,7 @@ def print_config(initrc, ocfs_config):
             '        ip_address = {}\n'
             '        ip_port = 7777\n'
             '        cluster = {}\n\n'
-        ).format(node_number, name, node_ip, cluster_name)
+        ).format(node_ip.split('.')[-1], name, node_ip, cluster_name)
     stdout += (
         """
 cluster:
@@ -89,7 +95,7 @@ cluster:
 
 
 @run_check_wrapper
-def check_ocfs2(initrc, bind9_path):
+def check_ocfs2(initrc, bind9_path, cluster_type='hypervisor'):
     ocfs_config = {}
     ocfs2_cluster_name_up = get_value_from_env(
         'OCFS2_CLUSTER_NAME', initrc).split('=')[1]
@@ -106,7 +112,7 @@ def check_ocfs2(initrc, bind9_path):
         s for s in net_up if 'NET' in s).split('=')[1]
     (node_full_pattern,
      node_name_pattern,
-     node_ip_pattern) = parse_dns_record_pattern(bind9_path)
+     node_ip_pattern) = parse_dns_record_pattern(bind9_path, cluster_type)
     hosti_range = get_value_from_file(
         'for hosti', bind9_path).split('\n')
     ocfs_config.update({
@@ -118,9 +124,14 @@ def check_ocfs2(initrc, bind9_path):
         'NODE_FULL_PATTERN': node_full_pattern,
         'NODE_NAME_PATTERN': node_name_pattern,
         'NODE_IP_PATTERN': node_ip_pattern,
-        '$hosti': hosti_range})
+        '$hosti': {
+            'hypervisor': hosti_range[0],
+            'controller': hosti_range[1],
+            'dbmaster': hosti_range[2]
+        }
+    })
     list_of_hostnames = get_list_of_hostnames(
-        initrc, ocfs_config).split('\n')
+        initrc, ocfs_config, cluster_type).split('\n')
     ocfs_config.update(
         {'NODE_HOSTNAME_LIST': [h for h in list_of_hostnames]})
     return ocfs_config
@@ -133,17 +144,23 @@ def check_cluster(initrc_, bind9):
 
 
 def main():
-    path = input('Enter firstboot path:\n')
-    initrc_ = find_file_by_pattern('initrc_', path)
-    initrc_2 = find_file_by_pattern('initrc_2', path)
+    # path = input('Enter firstboot path:\n')
+    path = '/Users/rshafikov/Desktop/_work/modulo/cobbler'
+    # initrc_ = find_file_by_pattern('initrc_', path)
+    # initrc_2 = find_file_by_pattern('initrc_2', path)
+    initrc_ctrl = find_file_by_pattern('initrc_.controller', path)
     bind9 = find_file_by_pattern('install_bind9', path)
-    ocfs_config_1 = check_ocfs2(initrc_, bind9)
-    print(json.dumps(ocfs_config_1, indent=4))
-    print(print_config(initrc_, ocfs_config_1))
+    # ocfs_config_1 = check_ocfs2(initrc_, bind9)
+    # print(json.dumps(ocfs_config_1, indent=4))
+    # print(print_config(initrc_, ocfs_config_1))
 
-    ocfs_config_2 = check_ocfs2(initrc_2, bind9)
-    print(json.dumps(ocfs_config_2, indent=4))
-    print(print_config(initrc_2, ocfs_config_2))
+    # ocfs_config_2 = check_ocfs2(initrc_2, bind9)
+    # print(json.dumps(ocfs_config_2, indent=4))
+    # print(print_config(initrc_2, ocfs_config_2))
+
+    ocfs_config_ctrl = check_ocfs2(initrc_ctrl, bind9, 'controller')
+    print(json.dumps(ocfs_config_ctrl, indent=4))
+    print(print_config(initrc_ctrl, ocfs_config_ctrl))
 
 
 if __name__ == '__main__':
