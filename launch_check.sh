@@ -630,8 +630,8 @@ LOG0="/tmp/log010"
 if [ -e "$FILE_NAME" ];then
 log="$(mktemp)"
 while read line; do
-  if [[ "$line" == *"cobbler  "* ]]; then
-    echo "${line#*cobbler  }" >> "$log"
+  if [[ "$line" == *"cobbler "* ]]; then
+    echo "${line#*cobbler }" >> "$log"
   fi
 done < $FILE_NAME
 sed -i 's/ //g' "$LOG0"      #garbage truck
