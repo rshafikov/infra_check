@@ -262,9 +262,7 @@ cat << 'EOF' > ./pars3.sh
 echo -e "########\e[31m 3 Настройки файла resolv.conf\e[0m########"
 FILE_NAME3="/etc/resolv.conf"
 LOG0="/tmp/log000"
-if [ -e "$FILE_NAME" ];then
-FILE_NAME3="/etc/resolv.conf"
-LOG0="/tmp/log000"
+if [ -e "$FILE_NAME3" ];then
 log="$(mktemp)"
 while read line; do
   if [[ "$line" == *"nameserver"* ]]; then
