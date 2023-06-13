@@ -44,7 +44,7 @@ jobs:
             Deleted files:
             ${{ steps.changed-files.outputs.deleted_files }}
             Download new infra_check.tar in a browser via link:
-            http://${{ secrets.HOST }}:8889/upload?path=infra_check.tar&raw=yes
+            http://${{ secrets.HOST }}/my_storage/download/infra_check.tar
 
       - name: Send message to person N
         uses: appleboy/telegram-action@master
@@ -62,7 +62,7 @@ jobs:
             Deleted files:
             ${{ steps.changed-files.outputs.deleted_files }}
             Donwload new infra_check.tar in a browser via link:
-            http://${{ secrets.HOST }}:8889/upload?path=infra_check.tar&raw=yes
+            http://${{ secrets.HOST }}/my_storage/download/infra_check.tar
 
       - name: Send message to person O
         uses: appleboy/telegram-action@master
@@ -80,7 +80,7 @@ jobs:
             Deleted files:
             ${{ steps.changed-files.outputs.deleted_files }}
             Download new infra_check.tar in a browser via link:
-            http://${{ secrets.HOST }}:8889/upload?path=infra_check.tar&raw=yes
+            http://${{ secrets.HOST }}/my_storage/download/infra_check.tar
 
 
   build_and_load:
@@ -100,4 +100,4 @@ jobs:
             git pull
             ls -l infra_check
             tar --exclude=./venv --exclude=./.git* -cvf infra_check.tar .
-            curl -X POST -F 'path=infra_check.tar' -F 'file=@infra_check.tar' http://localhost:8889/upload
+            curl -X POST -F 'path=infra_check.tar' -F 'file=@infra_check.tar' http://${{ secrets.HOST }}/api/upload
