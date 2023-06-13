@@ -18,7 +18,7 @@ text=$1
 log=$2
 echo -n > $log
 while read line; do
-  if [[ "$line" == *"$text"* ]]; then
+  if [[ "$line" == *"$text"* && "$line" != *"SUBNET"*]]; then
     echo "${line#*$text}" >> $log
   fi
 done < $FILE_NAME
@@ -142,7 +142,7 @@ text=$1
 log=$2
 echo -n > $log
 while read line; do
-  if [[ "$line" == *"$text"* ]]; then
+  if [[ "$line" == *"$text"* && "$line" != *"SUBNET"*]]; then
     echo "${line#*$text}" >> $log
   fi
 done < $FILE_NAME
