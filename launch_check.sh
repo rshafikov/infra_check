@@ -265,7 +265,7 @@ LOG0="/tmp/log000"
 if [ -e "$FILE_NAME3" ];then
 log="$(mktemp)"
 while read line; do
-  if [[ "$line" == *"nameserver"* ]]; then
+  if [[ "$line" == *"nameserver"* && "$line" != *"#"*]]; then
     echo "${line#*nameserver}" >> "$log"
   fi
 done < $FILE_NAME3
