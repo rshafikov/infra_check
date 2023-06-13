@@ -29,7 +29,8 @@ def parse_data():
         save_to_file('Trying to parse data locally')
         with open('endpars', 'r') as file:
             lines = [line for line in file]
-    ntp_servers = [line.split()[1] for line in lines if line.startswith('NTP')]
+    ntp_servers = [
+        line.split()[1] for line in lines if line.startswith('NTP')]
     dns_servers = {
         'dns': [line.split()[1] for line in lines if line.startswith('DNS')]}
     ldap_ipa = [line.split()[2:] for line in lines if line.startswith(
@@ -38,7 +39,8 @@ def parse_data():
         'Local DNS')]
     ldap_msad = [line.split()[2:] for line in lines if line.startswith(
         'Keystone AD')]
-    san_servers = [line.split()[1] for line in lines if line.startswith('SAN')]
+    san_servers = [
+        line.split()[1] for line in lines if line.startswith('SAN')]
     mtu = {'mtu': line.split()[1] for line in lines if line.startswith('MTU')}
 
     return (
@@ -56,29 +58,28 @@ def parse_data():
 
 (lines, packages, ntp_servers, dns_servers, ldap_ipa,
  dhcp_servers, ldap_msad, san_servers, mtu) = parse_data()
-
+# NTP check
 save_to_file('<NTP>'.center(69, '-'))
 ntp_output = check_ntp(ntp_servers)
 save_to_file(ntp_output)
-
+# DNS check
 save_to_file('<DNS>'.center(69, '-'))
 dns_output = check_dns(dns_servers.get('dns', []))
 save_to_file(dns_output)
-
+# DHCP check
 save_to_file('<DHCP>'.center(69, '-'))
 if 'Package isc-dhcp-client is installed' in packages:
     cmd = ['/bin/bash', '/root/custom_checks/run_dhcp.sh']
     dhcp_check = run_check_wrapper(subprocess.run)
     dhcp_check(cmd)
     time.sleep(1)
-
 else:
     save_to_file(
         'Failed to check DHCP-servers.\n'
         'Please install dhclient utility at first!\n'
         'Try this command: apt-get install isc-dhcp-client'
         )
-
+# LDAP check
 save_to_file('<LDAP-servers>'.center(69, '-'))
 if 'Package ldap-utils is installed' in packages:
     save_to_file('<IPA>'.center(69, '-'))
@@ -92,7 +93,6 @@ if 'Package ldap-utils is installed' in packages:
     except Exception as error:
         save_to_file(
             'There is an error with IPA LDAP-parameters: {}'.format(error))
-
     save_to_file('<MSAD>'.center(69, '-'))
     try:
         password = ldap_msad[2][0]
@@ -104,7 +104,6 @@ if 'Package ldap-utils is installed' in packages:
     except Exception as error:
         save_to_file(
             'There is an error with MSAD LDAP-parameters: {}'.format(error))
-
 else:
     logging.info('func {} - NOT HAS BEEN LAUNCHED'.format(check_ldap.__name__))
     save_to_file(
@@ -112,28 +111,29 @@ else:
         'Please install ldapsearch utility at first!\n'
         'Try this command: apt-get install ldap-utils'
         )
-
+# Cyrillic check
 save_to_file('<Cyrillic check>'.center(69, '-'))
 save_to_file(search_cyrillic(INITRC_DIR))
-
+# SAN check
 save_to_file('<SAN>'.center(69, '-'))
 save_to_file(check_san(san_servers))
-
+# MTU check
 save_to_file('<MTU>'.center(69, '-'))
 save_to_file(
     check_mtu(destination_server=dns_servers.get('dns', 'localhost'),
               max_size=mtu.get('mtu', 1500)))
-
+# MAC's check
 save_to_file("<MAC's>".center(69, '-'))
 save_to_file(check_macs(directory='/etc/dhcp/dhcpd.conf'))
-
+# OCFS2 check
 save_to_file("<OCFS2_CONF>".center(69, '-'))
-INITRC_, INITRC_2, BIND9 = (
+INITRC_, INITRC_2, INITRC_controller, BIND9 = (
     find_file_by_pattern('initrc_', INITRC_DIR),
     find_file_by_pattern('initrc_2', INITRC_DIR),
-    find_file_by_pattern('install_bind9', INITRC_DIR)
-)
-check_cluster(INITRC_, BIND9)
-check_cluster(INITRC_2, BIND9)
+    find_file_by_pattern('iinitrc_.controller', INITRC_DIR),
+    find_file_by_pattern('install_bind9', INITRC_DIR))
+check_cluster(INITRC_, BIND9, cluster_type='hypervisor')
+check_cluster(INITRC_2, BIND9, cluster_type='hypervisor')
+check_cluster(INITRC_controller, BIND9, cluster_type='controller')
 
 save_to_file('<END OF TEST>'.center(69, '-'))

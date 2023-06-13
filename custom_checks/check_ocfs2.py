@@ -15,7 +15,7 @@ def generate_fake_region():
 
 @run_check_wrapper
 def get_list_of_hostnames(
-    initrc, ocfs_config, cluster_type='hypervisor'):
+        initrc, ocfs_config, cluster_type='hypervisor'):
     cmd = (
         '''
             . {}
@@ -62,7 +62,7 @@ def parse_dns_record_pattern(
 
 @run_check_wrapper
 def print_config(initrc, ocfs_config):
-    stdout = 'OCFS2_CLUSTER by {}\n'.format(initrc)
+    stdout = 'OCFS2_CLUSTER by {}\n\n'.format(initrc)
     list_of_hosts = ocfs_config['$OCFS2_IPS']
     cluster_name = ocfs_config['$OCFS2_CLUSTER_NAME']
     stdout += (
@@ -88,7 +88,6 @@ cluster:
         node_count = {}
         heartbeat_mode = global
         name = {}
-
         """.format(len(list_of_hosts), cluster_name)
     )
     return stdout
@@ -138,25 +137,22 @@ def check_ocfs2(initrc, bind9_path, cluster_type='hypervisor'):
 
 
 @run_check_wrapper
-def check_cluster(initrc_, bind9):
-    ocfs_config = check_ocfs2(initrc_, bind9)
+def check_cluster(initrc_, bind9, cluster_type='hypervisor'):
+    ocfs_config = check_ocfs2(initrc_, bind9, cluster_type)
     save_to_file(print_config(initrc_, ocfs_config))
 
 
 def main():
-    # path = input('Enter firstboot path:\n')
-    path = '/Users/rshafikov/Desktop/_work/modulo/cobbler'
-    # initrc_ = find_file_by_pattern('initrc_', path)
-    # initrc_2 = find_file_by_pattern('initrc_2', path)
+    path = input('Enter firstboot path:\n')
+    # path = '/Users/rshafikov/Desktop/_work/modulo/cobbler'
+    initrc_ = find_file_by_pattern('initrc_', path)
+    initrc_2 = find_file_by_pattern('initrc_2', path)
     initrc_ctrl = find_file_by_pattern('initrc_.controller', path)
     bind9 = find_file_by_pattern('install_bind9', path)
-    # ocfs_config_1 = check_ocfs2(initrc_, bind9)
-    # print(json.dumps(ocfs_config_1, indent=4))
-    # print(print_config(initrc_, ocfs_config_1))
 
-    # ocfs_config_2 = check_ocfs2(initrc_2, bind9)
-    # print(json.dumps(ocfs_config_2, indent=4))
-    # print(print_config(initrc_2, ocfs_config_2))
+    check_cluster(initrc_, bind9)
+    check_cluster(initrc_2, bind9)
+    check_cluster(initrc_ctrl, bind9, 'controller')
 
     ocfs_config_ctrl = check_ocfs2(initrc_ctrl, bind9, 'controller')
     print(json.dumps(ocfs_config_ctrl, indent=4))

@@ -1,6 +1,7 @@
 # my own rules
 endpars
 infra_check.tar
+endtest.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
