@@ -25,6 +25,7 @@ done < $FILE_NAME
 sed -i 's/"//g' $log
 }
 
+log_https=/tmp/log_https
 log_s=/tmp/log3
 log_t=/tmp/log2
 log_tm=/tmp/log4
@@ -36,6 +37,7 @@ log_ntp=/tmp/log8
 export log_dns_zg=/tmp/log9
 log_mtu=/tmp/log10
 
+text_https="https://"
 text_s="REPO_IP/"
 text_t="REPO_IP="
 text_tm="TIMEZONE_FILE="
@@ -57,6 +59,7 @@ args=(
   "$text_ntp" "$log_ntp"
   "$text_dns_zg" "$log_dns_zg"
   "$text_mtu" "$log_mtu"
+  "$text_https" "$log_https"
 )
 
 for (( i=0; i<${#args[@]}; i+=2 )); do
@@ -100,12 +103,19 @@ done < $log_dns1
 
 ####
 cat "$log_tm" "$log_dns_zl" "$log_dns_zg" >> $LOG0
+
 ###+http+glue
 log=$(cat $log_t)
 
 while read line; do
   echo "http://${log}/${line}" >> $LOG0
 done < $log_s
+
+###https+glue
+sed -i 's/ .*//' "$log_https"
+while read line; do
+  echo "https://${line}" >> $LOG0
+done < $log_https
 
 ### IP NTP
 regex="([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)"
@@ -149,6 +159,8 @@ done < $FILE_NAME
 sed -i 's/"//g' $log
 }
 
+
+log_https=/tmp/log_https
 log_s=/tmp/log3
 log_t=/tmp/log2
 log_tm=/tmp/log4
@@ -160,6 +172,7 @@ log_ntp=/tmp/log8
 log_dns_zg=/tmp/log9
 log_mtu=/tmp/log10
 
+text_https="https://"
 text_s="REPO_IP/"
 text_t="REPO_IP="
 text_tm="TIMEZONE_FILE="
@@ -181,7 +194,7 @@ args=(
   "$text_ntp" "$log_ntp"
   "$text_dns_zg" "$log_dns_zg"
   "$text_mtu" "$log_mtu"
-
+  "$text_https" "$log_https"
 )
 
 for (( i=0; i<${#args[@]}; i+=2 )); do
@@ -227,12 +240,19 @@ done < $log_dns1
 
 ####
 cat "$log_tm" "$log_dns_zl" "$log_dns_zg" >> $LOG0
+
 ###+http+glue
 log=$(cat $log_t)
 
 while read line; do
   echo "http://${log}/${line}" >> $LOG0
 done < $log_s
+
+###https+glue
+sed -i 's/ .*//' "$log_https"
+while read line; do
+  echo "https://${line}" >> $LOG0
+done < $log_https
 
 ### IP NTP
 regex="([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)"
