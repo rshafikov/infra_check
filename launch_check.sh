@@ -117,14 +117,15 @@ while read line; do
   echo "https://${line}" >> $LOG0
 done < $log_https
 
-### IP NTP
-regex="([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)"
-while read -r line; do
-    if [[ "$line" =~ $regex ]]; then
-        ip="${BASH_REMATCH[1]}"
-        echo "NTP $ip" >> "$LOG0"
-    fi
+### dns NTP
+while IFS= read -r line; do
+  if [[ $line == *"="* ]]; then
+    dns_ip="${line#*=}"
+
+    echo "NTP $dns_ip" >>"$LOG0"
+  fi
 done < "$log_ntp"
+
 cat "$LOG0" > endpars
 source "$set_pwd/greentext.sh"
 source "$set_pwd/pars2.sh"
@@ -254,14 +255,15 @@ while read line; do
   echo "https://${line}" >> $LOG0
 done < $log_https
 
-### IP NTP
-regex="([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)"
-while read -r line; do
-    if [[ "$line" =~ $regex ]]; then
-        ip="${BASH_REMATCH[1]}"
-        echo "NTP $ip" >> "$LOG0"
-    fi
+### dns NTP
+while IFS= read -r line; do
+  if [[ $line == *"="* ]]; then
+    dns_ip="${line#*=}"
+
+    echo "NTP $dns_ip" >>"$LOG0"
+  fi
 done < "$log_ntp"
+
 cat "$LOG0" >> endpars
 source "$set_pwd/greentext.sh"
 source "$set_pwd/pars3.sh"
