@@ -1,9 +1,14 @@
 import csv
+import json
 import logging
 import socket
 import subprocess
 import traceback
 from functools import wraps
+
+from keystoneauth1 import loading, session
+from keystoneclient import client
+from novaclient import client as nova_client
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -29,7 +34,7 @@ def run_check_wrapper(func):
 
 
 @run_check_wrapper
-def get_nova_server_list() -> list:
+def get_nova_server_list_cli():
     hostname = socket.gethostname()
     cmd = [
         'nova', 'list',
@@ -39,6 +44,48 @@ def get_nova_server_list() -> list:
     ]
     output = subprocess.check_output(cmd).decode('utf-8').split('\n')[3:-1]
     return [[i.strip() for i in line.split('|')[1:-1]] for line in output]
+
+
+@run_check_wrapper
+def nova_servers_api(auth_url='http://10.42.40.8:5000/v3'):
+    keystone_loader = loading.get_plugin_loader('password')
+    auth_keystone = keystone_loader.load_from_options(
+        auth_url=auth_url,
+        username='admin',
+        password='accentos',
+        project_name='admin',
+        user_domain_name='default',
+        project_domain_name='default'
+    )
+    sess_keystone = session.Session(auth=auth_keystone)
+    keystone = client.Client(session=sess_keystone)
+    projects = keystone.projects.list()
+
+    nova_loader = loading.get_plugin_loader('password')
+    auth_nova = nova_loader.load_from_options(
+        auth_url=auth_url,
+        username='admin',
+        password='accentos',
+        project_name='admin',
+        user_domain_name='default',
+        project_domain_name='default'
+    )
+    sess_nova = session.Session(auth=auth_nova)
+    nova = nova_client.Client(version='2.47', session=sess_nova)
+    servers = nova.servers.list(
+        search_opts={
+            'all_tenants': 1,
+            'host': socket.gethostname()})
+
+    vms = {
+        vm._info.get(
+            "OS-EXT-SRV-ATTR:instance_name"): vm._info for vm in servers}
+    for vm in vms:
+        vm_project_id = vms[vm].get('tenant_id')
+        vm_project_name = next(
+            p.name for p in projects if p.id == vm_project_id)
+        vms[vm].update({'project_name': vm_project_name})
+    return vms
 
 
 @run_check_wrapper
@@ -56,7 +103,7 @@ def get_and_update_last_screen(
         '_hosted': screen.get('Hosted'),
         'server_list': [
             {
-                'hostname': hostname,
+                'hypervisor_hostname': hostname,
                 '_domain_name': screen.get('Domain name'),
                 '_domain_id': screen.get('Domain ID'),
                 'block_read': screen.get('Block RDRQ'),
@@ -72,7 +119,7 @@ def get_and_update_last_screen(
         for num in range(0, vm_count-1):
             screen_filled['server_list'].append(
                 {
-                    'hostname': hostname,
+                    'hypervisor_hostname': hostname,
                     '_domain_name': hosted[num*10+1],
                     '_domain_id': hosted[num*10],
                     'block_read': hosted[num*10+6],
@@ -86,26 +133,69 @@ def get_and_update_last_screen(
 
 
 @run_check_wrapper
-def main():
-    nova_server_list = get_nova_server_list()
+def nova_vm_list() -> list:
+    nova_servers = nova_servers_api()
     screen = get_and_update_last_screen()
     for server in screen['server_list']:
         s_domain_name = server['_domain_name']
+        nova_pair = nova_servers.get(s_domain_name)
+        if not nova_pair:
+            server.update({
+                'ID': server.get('_domain_id'),
+                'name': server.get('_domain_name')
+            })
+        else:
+            server.update({
+                'name': nova_pair.get('name'),
+                'user_id': nova_pair.get('user_id'),
+                'nova_compute_host': nova_pair.get('OS-EXT-SRV-ATTR:host'),
+                'project_name': nova_pair.get('project_name'),
+                'project_id': nova_pair.get('tenant_id'),
+                'flavor_name': nova_pair.get('flavor').get('original_name'),
+                'ID': nova_pair.get('id'),
+                'availability_zone': nova_pair.get(
+                    'OS-EXT-AZ:availability_zone'),
+                'created': nova_pair.get('created'),
+                'vm_state': nova_pair.get('OS-EXT-STS:vm_state'),
+                'power_state': nova_pair.get('OS-EXT-STS:power_state'),
+                'image_id': (
+                    nova_pair['image']['id'] if nova_pair['image'] else ''),
+                'ip_addr': nova_pair.get('addresses'),
+            })
+    return screen['server_list']
+
+
+def main():
+    vms = nova_vm_list()
+    for vm in vms:
+        logging.info('{}'.format(json.dumps(vm, indent=4)))
         try:
-            nova_pair = next(
-                s for s in nova_server_list if s[1] == s_domain_name)
-        except Exception:
-            nova_pair = [
-                server.get('_domain_id'), '', server.get('_domain_name')]
-        server.update({
-            'ID': nova_pair[0],
-            'name': nova_pair[2]
-        })
-        print(
-            server['hostname'], server['ID'],
-            server['name'], server['block_read'],
-            server['block_write'], server['cpu_%'],
-            server['ram_%'])
+            ips = ''.join(
+                ['{} {}'.format(
+                    vm['ip_addr'][ifc][0]['addr'],
+                    vm['ip_addr'][ifc][0]['OS-EXT-IPS-MAC:mac_addr'])
+                    for ifc in vm['ip_addr']])
+            print(
+                vm['hypervisor_hostname'], vm['ID'],
+                vm['name'], vm['block_read'],
+                vm['block_write'], vm['cpu_%'],
+                vm['ram_%'], vm['flavor_name'],
+                vm['user_id'], vm['project_id'],
+                vm['project_name'], vm['availability_zone'],
+                vm['vm_state'], vm['power_state'],
+                vm['created'], ips
+            )
+        except KeyError:
+            logging.info('{} not in OpenStack'.format(vm['name']))
+            print(
+                vm['hypervisor_hostname'], vm['ID'],
+                vm['name'], vm['block_read'],
+                vm['block_write'], vm['cpu_%'],
+                vm['ram_%']
+            )
+        except Exception as error:
+            logging.error(('Error: {}'.format(error),
+                           'Full error: {}'.format(traceback.format_exc())))
 
 
 if __name__ == '__main__':

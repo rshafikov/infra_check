@@ -6,10 +6,8 @@ from core import run_check_wrapper, save_to_file
 
 @run_check_wrapper
 def check_mtu(destination_server, max_size=1500, step=100):
-    try:
+    if isinstance(destination_server, list):
         destination_server = destination_server[0]
-    except Exception('localhost has given'):
-        destination_server = 'localhost'
 
     max_size = int(max_size)
     step = int(step)
