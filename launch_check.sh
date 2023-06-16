@@ -112,7 +112,8 @@ while read line; do
 done < $log_s
 
 ###https+glue
-sed -i 's/ .*//' "$log_https"
+sed -i 's/ .*//' "$log_https" #garbage truck
+sed -i 's/\/$//' "$log_https" #garbage truck
 while read line; do
   echo "https://${line}" >> $LOG0
 done < $log_https
@@ -250,7 +251,8 @@ while read line; do
 done < $log_s
 
 ###https+glue
-sed -i 's/ .*//' "$log_https"
+sed -i 's/ .*//' "$log_https" #garbage truck
+sed -i 's/\/$//' "$log_https" #garbage truck
 while read line; do
   echo "https://${line}" >> $LOG0
 done < $log_https
