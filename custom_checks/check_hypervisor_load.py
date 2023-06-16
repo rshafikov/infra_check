@@ -1,6 +1,8 @@
 import csv
 import json
 import logging
+import multiprocessing
+import os
 import socket
 import subprocess
 import traceback
@@ -34,6 +36,17 @@ def run_check_wrapper(func):
 
 
 @run_check_wrapper
+def load_env(file_path='/root/admin-openrc'):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            line = line.strip()
+            if line and not line.startswith('#') and line.startswith('export'):
+                key, value = line.replace('export ', '').split('=')
+                os.environ[key] = value
+
+
+@run_check_wrapper
 def get_nova_server_list_cli():
     hostname = socket.gethostname()
     cmd = [
@@ -47,36 +60,28 @@ def get_nova_server_list_cli():
 
 
 @run_check_wrapper
-def nova_servers_api(auth_url='http://10.42.40.8:5000/v3'):
-    keystone_loader = loading.get_plugin_loader('password')
-    auth_keystone = keystone_loader.load_from_options(
-        auth_url=auth_url,
-        username='admin',
-        password='accentos',
-        project_name='admin',
-        user_domain_name='default',
-        project_domain_name='default'
+def nova_servers_api():
+    load_env()
+    loader = loading.get_plugin_loader('password')
+    auth = loader.load_from_options(
+        auth_url=os.getenv('OS_AUTH_URL'),
+        username=os.getenv('OS_USERNAME'),
+        password=os.getenv('OS_PASSWORD'),
+        project_name=os.getenv('OS_PROJECT_NAME'),
+        user_domain_name=os.getenv('OS_USER_DOMAIN_NAME'),
+        project_domain_name=os.getenv('OS_PROJECT_DOMAIN_NAME')
     )
-    sess_keystone = session.Session(auth=auth_keystone)
+
+    sess_keystone = session.Session(auth=auth)
     keystone = client.Client(session=sess_keystone)
     projects = keystone.projects.list()
 
-    nova_loader = loading.get_plugin_loader('password')
-    auth_nova = nova_loader.load_from_options(
-        auth_url=auth_url,
-        username='admin',
-        password='accentos',
-        project_name='admin',
-        user_domain_name='default',
-        project_domain_name='default'
-    )
-    sess_nova = session.Session(auth=auth_nova)
+    sess_nova = session.Session(auth=auth)
     nova = nova_client.Client(version='2.47', session=sess_nova)
     servers = nova.servers.list(
         search_opts={
             'all_tenants': 1,
             'host': socket.gethostname()})
-
     vms = {
         vm._info.get(
             "OS-EXT-SRV-ATTR:instance_name"): vm._info for vm in servers}
@@ -94,8 +99,8 @@ def get_and_update_last_screen(
     with open(csv_file_path, 'r') as file:
         screens = [
             upd for upd in csv.DictReader(file, restkey='Hosted')]
-    screen = screens[-1]
-    vm_count = int(screen.get('Running'))
+    screen = screens[-2]
+    vm_count = int(screen.get('Running', '0'))
     hostname = screen.get('Hostname')
     screen_filled = {
         'hostname': hostname,
@@ -104,13 +109,16 @@ def get_and_update_last_screen(
         'server_list': [
             {
                 'hypervisor_hostname': hostname,
+                '_host_cpus': multiprocessing.cpu_count(),
                 '_domain_name': screen.get('Domain name'),
                 '_domain_id': screen.get('Domain ID'),
-                'block_read': screen.get('Block RDRQ'),
-                'block_write': screen.get('Block WRRQ'),
+                'block_read': screen.get('Block RDBY'),
+                'block_write': screen.get('Block WRBY'),
                 'cpu_%': format(
                     float(screen.get('%CPU').replace(',', '.')), '.3f'),
-                'ram_%': screen.get('%Mem')
+                'ram_%': screen.get('%Mem'),
+                'net_received': screen.get('Net RXBY'),
+                'net_sent': screen.get('Net TXBY')
             }]
         }
 
@@ -120,13 +128,16 @@ def get_and_update_last_screen(
             screen_filled['server_list'].append(
                 {
                     'hypervisor_hostname': hostname,
+                    '_host_cpus': multiprocessing.cpu_count(),
                     '_domain_name': hosted[num*10+1],
                     '_domain_id': hosted[num*10],
                     'block_read': hosted[num*10+6],
                     'block_write': hosted[num*10+7],
                     'cpu_%': format(
                         float(hosted[num*10+3].replace(',', '.')), '.3f'),
-                    'ram_%': hosted[num*10+5]
+                    'ram_%': hosted[num*10+5],
+                    'net_received': hosted[num*10+8],
+                    'net_sent': hosted[num*10+9]
                 }
             )
     return screen_filled
@@ -168,7 +179,10 @@ def nova_vm_list() -> list:
 def main():
     vms = nova_vm_list()
     for vm in vms:
-        logging.info('{}'.format(json.dumps(vm, indent=4)))
+        if isinstance(vm, dict):
+            logging.info('{}'.format(json.dumps(vm, indent=4)))
+        else:
+            logging.error('vm object:\n{}'.format(vm))
         try:
             ips = ''.join(
                 ['{} {}'.format(
@@ -179,7 +193,8 @@ def main():
                 vm['hypervisor_hostname'], vm['ID'],
                 vm['name'], vm['block_read'],
                 vm['block_write'], vm['cpu_%'],
-                vm['ram_%'], vm['flavor_name'],
+                vm['ram_%'], vm['net_received'],
+                vm['net_sent'], vm['flavor_name'],
                 vm['user_id'], vm['project_id'],
                 vm['project_name'], vm['availability_zone'],
                 vm['vm_state'], vm['power_state'],
@@ -191,7 +206,8 @@ def main():
                 vm['hypervisor_hostname'], vm['ID'],
                 vm['name'], vm['block_read'],
                 vm['block_write'], vm['cpu_%'],
-                vm['ram_%']
+                vm['ram_%'], vm['net_received'],
+                vm['net_sent']
             )
         except Exception as error:
             logging.error(('Error: {}'.format(error),

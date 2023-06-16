@@ -64,3 +64,14 @@ def save_to_file(content='error: no content', path='endtest.txt'):
     print(content)
     with open(path, 'a') as file:
         file.write(content + '\n')
+
+
+@run_check_wrapper
+def load_env(file_path='/root/admin-openrc'):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            line = line.strip()
+            if line and not line.startswith('#') and line.startswith('export'):
+                key, value = line.replace('export ', '').split('=')
+                os.environ[key] = value
