@@ -4,10 +4,13 @@ cat << 'EOF' > ./pars.sh
 #!/bin/bash
 echo -e "########\e[31m Проверка пакетов для работы скрипта\e[0m########"
 source check_pack.sh
-source ini.sh
+source fi.sh
 echo -e "########\e[31m 1 Настройки файла initrc_\e[0m########"
 export "pars"
 export "pars2"
+export "pars5"
+export "pars6"
+export "pars11"
 LOG0=/tmp/log0
 FILE_NAME="$pars"
 export set_pwd="$PWD"
@@ -378,7 +381,7 @@ chmod 775 ./pars4.sh
 cat << 'EOF' > ./pars5.sh
 #!/bin/bash
 echo -e "########\e[31m 5 Настройки файла install_bind9-forward-zone\e[0m########"
-FILE_NAME="/var/www/html/stable/astra/1.6/install_bind9-forward-zone"
+FILE_NAME="$pars5"
 touch /tmp/log05
 LOG0=/tmp/log05
 
@@ -428,7 +431,7 @@ chmod 775 ./pars5.sh
 cat << 'EOF' > ./pars6.sh
 #!/bin/bash
 echo -e "########\e[31m 6 Настройки файла install_cinder-volume.ha\e[0m########"
-FILE_NAME="/var/www/html/stable/astra/1.6/install_cinder-volume.ha"
+FILE_NAME="$pars6"
 LOG0=/tmp/log06
 if [ -e "$FILE_NAME" ];then
 ###
@@ -838,7 +841,7 @@ cat << 'EOF' > ./pars11.sh
 #!/bin/bash
 echo -e "########\e[31m 11 Настройки файла san.cfg \e[0m########"
 LOG0=/tmp/log11
-FILE_NAME="/var/www/html/stable/astra/1.6/san.cfg"
+FILE_NAME="$pars11"
 if [ -e "$FILE_NAME" ];then
 ###
 function search(){
@@ -893,7 +896,78 @@ EOF
 
 chmod 775 ./pars11.sh
 
-cat << 'EOF' > ./ini.sh
+cat << 'EOF' > ./fi.sh
+#!/bin/bash
+hostname=$(hostname)
+echo "$hostname"
+if [ "$hostname" = cobbler-astra17 ]; then
+     source 100523.sh
+    elif [ "$hostname" = debian ]; then
+       source 221122.sh
+          elif [ "$hostname" = cobblerdeb2 ]; then
+           source 221122.sh
+ else
+  echo "Версия FistBoot не тестировалась данной утилитой или изменено hostname "
+   exit 0
+fi
+
+
+EOF
+
+chmod 775 ./fi.sh
+
+cat << 'EOF' > ./16.ini
+[16]
+pars=/var/www/html/stable/astra/1.6/initrc_
+pars2=/var/www/html/stable/astra/1.6/initrc_2
+EOF
+
+cat << 'EOF' > ./17.ini
+[17]
+pars=/var/www/html/stable/astra/1.7/initrc_
+pars2=/var/www/html/stable/astra/1.7/initrc_2
+EOF
+
+
+cat << 'EOF' > ./one17.ini
+[17]
+pars=/var/www/html/one/stable/astra/1.7/initrc_
+pars2=/var/www/html/one/stable/astra/1.7/initrc_2
+pars5=/var/www/html/one/stable/astra/1.7/install_bind9-forward-zone
+pars6=/var/www/html/one/stable/astra/1.7/install_cinder-volume.ha
+pars11=/var/www/html/one/stable/astra/1.7/san.cfg
+EOF
+
+cat << 'EOF' > ./ha17.ini
+[17]
+pars=/var/www/html/ha/stable/astra/1.7/initrc_
+pars2=/var/www/html/ha/stable/astra/1.7/initrc_2
+pars5=/var/www/html/ha/stable/astra/1.7/install_bind9-forward-zone
+pars6=/var/www/html/ha/stable/astra/1.7/install_cinder-volume.ha
+pars11=/var/www/html/ha/stable/astra/1.7/san.cfg
+
+EOF
+
+cat << 'EOF' > ./100523.sh
+#!/bin/bash
+echo -e -n "Введите номер для выбора количества УУ Астра 1.7: 1-(Один Контроллер) или 2-(Кластер 3 Контроллера) \n"
+read -r pa_os
+
+if [ "$pa_os" = 1 ]; then
+   source <(grep = one17.ini | sed 's/ *= */=/g')
+    elif [ "$pa_os" = 2 ]; then
+     source <(grep = ha17.ini | sed 's/ *= */=/g')
+
+
+ else
+  echo "Нет верных данных повторите запуск"
+   exit 0
+fi
+EOF
+
+chmod 775 ./100523.sh
+
+cat << 'EOF' > ./221122.sh
 #!/bin/bash
 echo -e -n "Введите номер версии для ОС Астра: 1-(1.6) или 2-(1.7) \n"
 read -r pa_os
@@ -908,20 +982,8 @@ if [ "$pa_os" = 1 ]; then
   echo "Нет верных данных повторите запуск"
    exit 0
 fi
-
 EOF
 
-chmod 775 ./ini.sh
+chmod 775 ./221122.sh
 
-cat << 'EOF' > ./16.ini
-[16]
-pars=/var/www/html/stable/astra/1.6/initrc_
-pars2=/var/www/html/stable/astra/1.6/initrc_2
-EOF
-
-cat << 'EOF' > ./17.ini
-[17]
-pars=/var/www/html/stable/astra/1.7/initrc_
-pars2=/var/www/html/stable/astra/1.7/initrc_2
-EOF
 source pars.sh
