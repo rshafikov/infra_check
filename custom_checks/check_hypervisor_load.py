@@ -3,6 +3,7 @@ import json
 import logging
 import multiprocessing
 import os
+import psutil
 import socket
 import subprocess
 import traceback
@@ -100,16 +101,18 @@ def get_and_update_last_screen(
         screens = [
             upd for upd in csv.DictReader(file, restkey='Hosted')]
     screen = screens[-2]
+    host_cpus = multiprocessing.cpu_count()
+    host_ram = int(psutil.virtual_memory().total / (1024 ** 2))
     vm_count = int(screen.get('Running', '0'))
     hostname = screen.get('Hostname')
     screen_filled = {
-        'hostname': hostname,
         '_running': vm_count,
         '_hosted': screen.get('Hosted'),
         'server_list': [
             {
                 'hypervisor_hostname': hostname,
-                '_host_cpus': multiprocessing.cpu_count(),
+                'host_cpus': host_cpus,
+                'host_ram': host_ram,
                 '_domain_name': screen.get('Domain name'),
                 '_domain_id': screen.get('Domain ID'),
                 'block_read': screen.get('Block RDBY'),
@@ -128,7 +131,8 @@ def get_and_update_last_screen(
             screen_filled['server_list'].append(
                 {
                     'hypervisor_hostname': hostname,
-                    '_host_cpus': multiprocessing.cpu_count(),
+                    'host_cpus': host_cpus,
+                    'host_ram': host_ram,
                     '_domain_name': hosted[num*10+1],
                     '_domain_id': hosted[num*10],
                     'block_read': hosted[num*10+6],
@@ -147,22 +151,24 @@ def get_and_update_last_screen(
 def nova_vm_list() -> list:
     nova_servers = nova_servers_api()
     screen = get_and_update_last_screen()
-    for server in screen['server_list']:
-        s_domain_name = server['_domain_name']
+    for s in screen['server_list']:
+        s_domain_name = s['_domain_name']
         nova_pair = nova_servers.get(s_domain_name)
         if not nova_pair:
-            server.update({
-                'ID': server.get('_domain_id'),
-                'name': server.get('_domain_name')
+            s.update({
+                'ID': s.get('_domain_id'),
+                'name': s.get('_domain_name')
             })
         else:
-            server.update({
+            s.update({
                 'name': nova_pair.get('name'),
                 'user_id': nova_pair.get('user_id'),
                 'nova_compute_host': nova_pair.get('OS-EXT-SRV-ATTR:host'),
                 'project_name': nova_pair.get('project_name'),
                 'project_id': nova_pair.get('tenant_id'),
                 'flavor_name': nova_pair.get('flavor').get('original_name'),
+                'flavor_cpus': nova_pair.get('flavor').get('vcpus'),
+                'flavor_ram': nova_pair.get('flavor').get('ram'),
                 'ID': nova_pair.get('id'),
                 'availability_zone': nova_pair.get(
                     'OS-EXT-AZ:availability_zone'),
@@ -173,45 +179,66 @@ def nova_vm_list() -> list:
                     nova_pair['image']['id'] if nova_pair['image'] else ''),
                 'ip_addr': nova_pair.get('addresses'),
             })
+            s.update({
+                'cpu_current': format(
+                    ((s['host_cpus'] * float(s['cpu_%'])) / (
+                        s['flavor_cpus'])),
+                    '.2f'),
+                'ram_current': format(
+                    ((s['host_ram'] * float(s['ram_%'])) / (
+                        s['flavor_ram'])),
+                    '.2f')
+            })
     return screen['server_list']
 
 
 def main():
+    cmd = ('virt-top --block-in-bytes --script '
+           '-n 5 --csv /tmp/virt-output.csv')
+    subprocess.run(
+        ['bash', '-c', cmd])
+    output = ''
     vms = nova_vm_list()
     for vm in vms:
-        if isinstance(vm, dict):
-            logging.info('{}'.format(json.dumps(vm, indent=4)))
-        else:
-            logging.error('vm object:\n{}'.format(vm))
         try:
             ips = ''.join(
                 ['{} {}'.format(
                     vm['ip_addr'][ifc][0]['addr'],
                     vm['ip_addr'][ifc][0]['OS-EXT-IPS-MAC:mac_addr'])
                     for ifc in vm['ip_addr']])
-            print(
+            output += ' '.join([
                 vm['hypervisor_hostname'], vm['ID'],
-                vm['name'], vm['block_read'],
-                vm['block_write'], vm['cpu_%'],
-                vm['ram_%'], vm['net_received'],
-                vm['net_sent'], vm['flavor_name'],
+                vm['name'], str(vm['block_read']),
+                str(vm['block_write']), vm['cpu_%'],
+                vm['ram_%'], str(vm['net_received']),
+                str(vm['net_sent']), vm['flavor_name'],
+                vm['cpu_current'], vm['ram_current'],
                 vm['user_id'], vm['project_id'],
                 vm['project_name'], vm['availability_zone'],
-                vm['vm_state'], vm['power_state'],
-                vm['created'], ips
-            )
+                str(vm['vm_state']), str(vm['power_state']),
+                str(vm['created']), ips, '\n'
+            ])
         except KeyError:
             logging.info('{} not in OpenStack'.format(vm['name']))
-            print(
+            output += ' '.join([
                 vm['hypervisor_hostname'], vm['ID'],
-                vm['name'], vm['block_read'],
-                vm['block_write'], vm['cpu_%'],
-                vm['ram_%'], vm['net_received'],
-                vm['net_sent']
-            )
+                vm['name'], str(vm['block_read']),
+                str(vm['block_write']), vm['cpu_%'],
+                vm['ram_%'], str(vm['net_received']),
+                str(vm['net_sent']), 'External_VM',
+                '-1', '-1', '-1', '-1',
+                'External_VM', 'External_VM',
+                'External_VM', 'External_VM',
+                'External_VM', 'External_VM',
+                'External_VM', '\n'
+            ])
         except Exception as error:
             logging.error(('Error: {}'.format(error),
                            'Full error: {}'.format(traceback.format_exc())))
+        logging.info('{}'.format(json.dumps(vm, indent=4)))
+
+    with open('/tmp/hypervisor_load.txt', 'w') as file:
+        file.write(output)
 
 
 if __name__ == '__main__':
