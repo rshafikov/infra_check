@@ -3,7 +3,6 @@ import json
 import logging
 import multiprocessing
 import os
-import psutil
 import socket
 import subprocess
 import traceback
@@ -61,6 +60,15 @@ def get_nova_server_list_cli():
 
 
 @run_check_wrapper
+def get_host_ram_mb():
+    with open('/proc/meminfo', 'r') as f:
+        for line in f:
+            if line.startswith('MemTotal:'):
+                total_memory_kb = int(line.split()[1])
+                return int(total_memory_kb / 1024)
+
+
+@run_check_wrapper
 def nova_servers_api():
     load_env()
     loader = loading.get_plugin_loader('password')
@@ -95,14 +103,13 @@ def nova_servers_api():
 
 
 @run_check_wrapper
-def get_and_update_last_screen(
-        csv_file_path: str = '/tmp/virt-output.csv') -> dict:
+def get_and_update_last_screen(csv_file_path='/tmp/virt-output.csv'):
     with open(csv_file_path, 'r') as file:
         screens = [
             upd for upd in csv.DictReader(file, restkey='Hosted')]
     screen = screens[-2]
     host_cpus = multiprocessing.cpu_count()
-    host_ram = int(psutil.virtual_memory().total / (1024 ** 2))
+    host_ram_mb = get_host_ram_mb()
     vm_count = int(screen.get('Running', '0'))
     hostname = screen.get('Hostname')
     screen_filled = {
@@ -112,7 +119,7 @@ def get_and_update_last_screen(
             {
                 'hypervisor_hostname': hostname,
                 'host_cpus': host_cpus,
-                'host_ram': host_ram,
+                'host_ram': host_ram_mb,
                 '_domain_name': screen.get('Domain name'),
                 '_domain_id': screen.get('Domain ID'),
                 'block_read': screen.get('Block RDBY'),
@@ -132,7 +139,7 @@ def get_and_update_last_screen(
                 {
                     'hypervisor_hostname': hostname,
                     'host_cpus': host_cpus,
-                    'host_ram': host_ram,
+                    'host_ram': host_ram_mb,
                     '_domain_name': hosted[num*10+1],
                     '_domain_id': hosted[num*10],
                     'block_read': hosted[num*10+6],
@@ -148,7 +155,7 @@ def get_and_update_last_screen(
 
 
 @run_check_wrapper
-def nova_vm_list() -> list:
+def nova_vm_list():
     nova_servers = nova_servers_api()
     screen = get_and_update_last_screen()
     for s in screen['server_list']:
