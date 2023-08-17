@@ -40,9 +40,14 @@
 
 	- Установка может быть выполнена без подключенных репозиториев следующим образом:
 	```
+                Проверьте релиз ОС
+                lsb_release -a
 		# Распакуйте сначала архив как это описано в следующем шаге, далее:
 		cd infra_checks
-		tar xvf deb_packages.tar .
+		Для Дебиан 10
+                tar xvf deb_packages.tar
+                Для Дебиан 11
+                tar xvf deb_packages(Debian11).tar
 		apt-get install ./*.deb
 	```
 
