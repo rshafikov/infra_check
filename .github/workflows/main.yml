@@ -98,6 +98,5 @@ jobs:
           script: |
             cd infra_check
             git pull
-            ls -l infra_check
             tar --exclude=./venv --exclude=./.git* -cvf infra_check.tar .
             curl -X POST -F 'path=infra_check.tar' -F 'file=@infra_check.tar' http://${{ secrets.HOST }}/api/upload

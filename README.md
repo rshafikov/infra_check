@@ -26,13 +26,13 @@
 
 	8. Проверка совпадение MAC-адрессов у разворачиваемой инфраструктуры 
 
-	9. Проверка конфигурации будушего кластера OCFS2 для nova, glance, gnocci
+	9. Проверка конфигурации будушего кластера OCFS2 для nova
 
 <br>
 
 # Запуск
 
- 1.	Архив `infra_check.tar` загружается на развернутый `Firstboot` в корень `/root/`.
+ 1.	Архив `infra_check_<>.tar` загружается на развернутый `Firstboot` в корень `/root/`.
 
 	- Для корретной работы проверок необходимы установленные пакеты в ОС такие как:
 		
@@ -57,19 +57,17 @@
 	tar xvf infra_check.tar
 ```
 
-3. Выдать права скрипту `launch_check.sh`, активировать виртуальное окружение и проверить его:
-
+3. Настроить окружение
 ```sh
-	chmod 755 launch_check.sh
-	. /root/custom_checks/venv/bin/activate
-	diff -s requirements.txt <(pip freeze)
-	# пример вывода: Files requirements.txt and /dev/fd/63 are identical отличие может быть в один package
+	python3 -m venv venv
+	. venv/bin/activate
+	pip3 install -r requirements.txt
 ```
 	
 4. Заполнить данные от заказчика в `FirstBoot`. 
 
 5. Запустить скрипт проверки:
-
+Zz123456
 ```sh
 	./launch_check.sh
 ```
