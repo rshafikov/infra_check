@@ -6,10 +6,10 @@ import traceback
 from functools import wraps
 
 logging.basicConfig(
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     # filename='/var/log/infra_check.log',
     filename='infra_check.log',
-    filemode='a',
+    filemode='w',
     level=logging.INFO
 )
 
@@ -17,11 +17,12 @@ logging.basicConfig(
 def run_check_wrapper(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
+        logger = logging.getLogger(__name__)
         try:
-            logging.info('func {} - OK'.format(func.__name__))
+            logger.info('func {} - OK'.format(func.__name__))
             return func(*args, **kwargs)
         except Exception as error:
-            logging.error(('There is an error with {}'.format(func.__name__),
+            logger.error(('There is an error with {}'.format(func.__name__),
                            'Error: {}'.format(error),
                            'Full error: {}'.format(traceback.format_exc())))
             return 'There is an error with {}'.format(func.__name__)
