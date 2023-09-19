@@ -34,47 +34,47 @@
 
  1.	Архив `infra_check_<>.tar` загружается на развернутый `Firstboot` в корень `/root/`.
 
-	- Для корретной работы проверок необходимы установленные пакеты в ОС такие как:
+- Для корретной работы проверок необходимы установленные пакеты в ОС такие как
 		
-		`curl`, `ldap-utils`, `isc-dhcp-client`
+	`curl`, `ldap-utils`, `isc-dhcp-client`
 
-	- Установка может быть выполнена без подключенных репозиториев следующим образом:
-	```
-                Проверьте релиз ОС
-                lsb_release -a
-		# Распакуйте сначала архив как это описано в следующем шаге, далее:
-		cd infra_checks
-		Для Дебиан 10
-                tar xvf deb_packages.tar
-                Для Дебиан 11
-                tar xvf deb_packages(Debian11).tar
-		apt-get install ./*.deb
-	```
+- Установка может быть выполнена без подключенных репозиториев следующим образом:
 
-2. Распаковать архив:
-
-```sh
-	tar xvf infra_check.tar
+```shell
+# Проверьте релиз ОС
+lsb_release -a
+# Распакуйте сначала скачанный архив
+tar xvf infra_check.tar
+cd infra_checks
+# Для Debian 10
+tar xvf deb10_packages.tar
+# Для Debian 11
+tar xvf deb11_packages.tar
+apt-get install ./*.deb
 ```
 
-3. Настроить окружение
-```sh
-	python3 -m venv venv
-	. venv/bin/activate
-	pip3 install -r requirements.txt
-```
-	
-4. Заполнить данные от заказчика в `FirstBoot`. 
+2. Настроить окружение:
 
-5. Запустить скрипт проверки:
-Zz123456
 ```sh
-	./launch_check.sh
+# если есть подключенный репозиторий для скачивания и установки python пакетов
+python3 -m venv venv
+. venv/bin/activate
+pip3 install -r requirements.txt
+# если нет, то распаковываем venv с вашей версией питона:
+python3 -V
+tar xvf venv_<your_python_version>
+. venv/bin/activate
 ```
 
-6. Проанализировать результаты работы скрипта, при необходимости внести правки в `FirstBoot.
+3. Запустить скрипт проверки:
 
-	- Логи работы проверок на находятся по пути `/var/logs/infra_check.log`. В них детально описаны все вызванные python-функции, а также полученные ошибки. 
+```sh
+./launch_check.sh
+```
+
+4Проанализировать результаты работы скрипта, при необходимости внести правки в `FirstBoot.
+
+	- Логи работы проверок на находятся по пути `.../<PWD>/infra_check.log`. В них детально описаны все вызванные python-функции, а также полученные ошибки. 
 
 	- Скрипты проверок можно посмотреть в `/root/custom_checks/`
 
