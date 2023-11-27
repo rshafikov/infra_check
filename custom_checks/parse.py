@@ -120,7 +120,7 @@ save_to_file(check_san(san_servers))
 # MTU check
 save_to_file('<MTU>'.center(69, '-'))
 save_to_file(
-    check_mtu(destination_server=dns_servers.get('dns', 'localhost'),
+    check_mtu(dest_server=dns_servers.get('dns', 'localhost'),
               max_size=mtu.get('mtu', 1500)))
 # MAC's check
 save_to_file("<MAC's>".center(69, '-'))

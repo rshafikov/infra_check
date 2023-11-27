@@ -1,10 +1,15 @@
-from core import run_check_wrapper
+import logging
+
+from core import is_check_enabled, run_check_wrapper, save_to_file
 
 
 @run_check_wrapper
-def check_macs(directory='dhcpd.conf'):
+def check_macs(conf):
+    default_value = '/etc/dhcp/dhpcd.conf'
+    dhcpd_path = conf.config.get(
+        'CHECK', 'dhcpd_path', fallback=default_value)
     macs = []
-    with open(directory, encoding='utf-8') as file:
+    with open(dhcpd_path, encoding='utf-8') as file:
         content = file.readlines()
         macs = [line.strip().split()[2][:-1] for line in content if line.strip(
         ).startswith('hardware')]
@@ -23,9 +28,10 @@ def check_macs(directory='dhcpd.conf'):
             len(doubled_macs), ' '.join(doubled_macs))
 
 
-def main():
-    print(check_macs(input('Write dhcpd.conf path:\n')))
+@is_check_enabled(check_name='check_macs')
+def main_check_macs(conf, check_name, *args, **kwargs):
+    save_to_file(check_name=check_name, content=check_macs(conf))
 
 
 if __name__ == '__main__':
-    main()
+    main_check_macs()

@@ -39,7 +39,7 @@ def get_list_of_hostnames(
         ['bash', '-c', cmd], capture_output=True, text=True).stdout
 
 
-@run_check_wrapper
+# @run_check_wrapper
 def parse_dns_record_pattern(
         bind9_path, cluster_type='hypervisor'):
     hostname_patterns = get_value_from_file(
@@ -60,7 +60,7 @@ def parse_dns_record_pattern(
     return n_full_pattern, n_name_pattern, n_ip_pattern
 
 
-@run_check_wrapper
+# @run_check_wrapper
 def print_config(initrc, ocfs_config):
     stdout = 'OCFS2_CLUSTER by {}\n\n'.format(initrc)
     list_of_hosts = ocfs_config['$OCFS2_IPS']
@@ -93,11 +93,12 @@ cluster:
     return stdout
 
 
-@run_check_wrapper
+# @run_check_wrapper
 def check_ocfs2(initrc, bind9_path, cluster_type='hypervisor'):
     ocfs_config = {}
     ocfs2_cluster_name_up = get_value_from_env(
-        'OCFS2_CLUSTER_NAME', initrc).split('=')[1]
+        'OCFS2_CLUSTER_NAME', initrc).split('=')
+    print(ocfs2_cluster_name_up)
     ocfs2_ips_up = get_value_from_env(
         'OCFS2_IPS', initrc).split('=')[1].split()
     ocfs_number_of_nodes_list = [subprocess.getoutput(
@@ -136,27 +137,32 @@ def check_ocfs2(initrc, bind9_path, cluster_type='hypervisor'):
     return ocfs_config
 
 
-@run_check_wrapper
+# @run_check_wrapper
 def check_cluster(initrc_, bind9, cluster_type='hypervisor'):
     ocfs_config = check_ocfs2(initrc_, bind9, cluster_type)
     save_to_file(print_config(initrc_, ocfs_config))
 
 
 def main():
-    path = input('Enter firstboot path:\n')
-    # path = '/Users/rshafikov/Desktop/_work/modulo/cobbler'
-    initrc_ = find_file_by_pattern('initrc_', path)
-    initrc_2 = find_file_by_pattern('initrc_2', path)
-    initrc_ctrl = find_file_by_pattern('initrc_.controller', path)
-    bind9 = find_file_by_pattern('install_bind9', path)
-
-    check_cluster(initrc_, bind9)
-    check_cluster(initrc_2, bind9)
-    check_cluster(initrc_ctrl, bind9, 'controller')
-
-    ocfs_config_ctrl = check_ocfs2(initrc_ctrl, bind9, 'controller')
-    print(json.dumps(ocfs_config_ctrl, indent=4))
-    print(print_config(initrc_ctrl, ocfs_config_ctrl))
+    check_cluster(
+        '/Users/rshafikov/Desktop/_work/modulo/cobbler/custom_checks/1.7/install_ocfs2',
+        '/Users/rshafikov/Desktop/_work/modulo/cobbler/custom_checks/1.7/install_bind9',
+    )
+    # path = input('Enter path of the directory with initrc_ files:\n')
+    # initrc_ = find_file_by_pattern('initrc_', path)
+    # initrc_2 = find_file_by_pattern('initrc_2', path)
+    # initrc_ctrl = find_file_by_pattern('initrc_.controller.ocfs2', path)
+    # bind9 = find_file_by_pattern('install_bind9', path)
+    # if initrc_ != f'No file with name: initrc_':
+    #     check_cluster(initrc_, bind9)
+    # if initrc_2 != f'No file with name: initrc_2':
+    #     check_cluster(initrc_2, bind9)
+    # if initrc_ctrl != f'No file with name: initrc_.controller.ocfs2':
+    #     check_cluster(initrc_ctrl, bind9, 'controller')
+    #
+    # ocfs_config_ctrl = check_ocfs2(initrc_ctrl, bind9, 'controller')
+    # print(json.dumps(ocfs_config_ctrl, indent=4))
+    # print(print_config(initrc_ctrl, ocfs_config_ctrl))
 
 
 if __name__ == '__main__':

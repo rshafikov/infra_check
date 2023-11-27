@@ -1,11 +1,19 @@
-import sys
-
 import requests
-from core import run_check_wrapper
+from core import is_check_enabled, run_check_wrapper, save_to_file
+
+
+class NoSANSetupError(Exception):
+    pass
 
 
 @run_check_wrapper
-def check_san(servers):
+def check_san(servers=None, conf=None):
+    if not servers:
+        servers = conf.config.get(
+            'DEFAULT', 'san_servers', fallback='Please setup SAN servers for this check')
+        if servers == 'Please setup SAN servers for this check':
+            raise NoSANSetupError(servers)
+        servers = servers.split(', ') if ',' in servers else servers.split()
     stdout = ''
     alive_servers = []
     bad_servers = []
@@ -28,7 +36,7 @@ def check_san(servers):
             bad_servers.append(server)
             stdout += "SAN is not available at {}\n".format(server)
     if bad_servers:
-        stdout += 'Problem servers: {}\n'.format(', '.join(bad_servers))
+        stdout += 'Problem servers: {}\n'.format(','.join(bad_servers))
     stdout += (
         'Available {} from {}: '
         '{}'.format(len(alive_servers), str(len(servers)), alive_servers)
@@ -36,11 +44,15 @@ def check_san(servers):
     return stdout
 
 
-def main():
-    read = sys.stdin.readline()
-    servers = [server for server in read.split()]
-    print(check_san(servers))
+@is_check_enabled(check_name='check_san')
+def main_check_san(conf, check_name, inp=None):
+    servers = None
+    if inp:
+        inp = input('enter ip:\n')
+        servers = [server for server in inp.split()]
+
+    save_to_file(check_name, check_san(servers=servers, conf=conf))
 
 
 if __name__ == '__main__':
-    main()
+    main_check_san(inp=False)

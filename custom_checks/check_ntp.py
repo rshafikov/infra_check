@@ -1,13 +1,18 @@
+import json
+import logging
 import socket
 import struct
-import sys
 import time
 from socket import AF_INET, SOCK_DGRAM
 
-from core import run_check_wrapper
+from core import (CONF, get_values_from_env, is_check_enabled,
+                  run_check_wrapper, save_to_file)
+
+LOG = logging.getLogger(__name__)
+LOG.setLevel(CONF.config.get('DEFAULT', 'log_level', fallback='INFO').upper())
 
 
-def get_ntp_time(host='pool.ntp.org'):
+def _get_ntp_time(host='pool.ntp.org'):
     port = 123
     buf = 1024
     address = (host, port)
@@ -22,33 +27,39 @@ def get_ntp_time(host='pool.ntp.org'):
     return time.ctime(t).replace('  ', ' ')
 
 
+def _get_ntp_from_initrc(initrc_path, ntp_pattern=r'\w+_NTP[0-9]?'):
+    return get_values_from_env(
+            initrc_path,
+            pattern=ntp_pattern)
+
+
 @run_check_wrapper
-def check_ntp(servers):
+def check_ntp(initrc, pattern):
+    servers = _get_ntp_from_initrc(initrc, pattern)
+    LOG.debug('%s parsed values: %s' % (initrc, servers))
     alive_servers = []
     time_list = {}
     bad_servers = []
-    stdout = ''
-    for server in servers:
+    for server in servers.values():
         try:
-            time_list.setdefault(server, get_ntp_time(server))
+            time_list.setdefault(server, _get_ntp_time(server))
             alive_servers.append(server)
         except Exception as error:
-            stdout += 'NTP {} is NOT available: {}\n'.format(server, error)
             bad_servers.append(server)
-    if bad_servers:
-        stdout += 'Problem servers: {}\n'.format(', '.join(bad_servers))
-    stdout += (
-        'Available {} from {}: '
-        '{}'.format(len(alive_servers), str(len(servers)), alive_servers)
-    )
-    return stdout
+    return {
+        'availability': f'Available {str(len(alive_servers))} from {str(len(servers))}',
+        'available_servers': ', '.join(alive_servers),
+        'problem_servers': ', '.join(bad_servers) if bad_servers else 'not found'
+    }
 
 
-def main():
-    read = sys.stdin.readline()
-    servers = [server for server in read.split()]
-    print(check_ntp(servers))
+@is_check_enabled(check_name='check_ntp')
+def main_check_ntp(conf, check_name, *args, **kwargs):
+    initrc_files = conf.initrc_list
+    ntp_pattern = conf.get_regexp('ntp_pattern', r'\w+_NTP[0-9]?')
+    result = {path: check_ntp(path, ntp_pattern) for path in initrc_files}
+    save_to_file(check_name=check_name, content=json.dumps(result, indent=4))
 
 
 if __name__ == '__main__':
-    main()
+    main_check_ntp()

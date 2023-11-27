@@ -4,3 +4,4 @@ idna==3.4
 requests==2.30.0
 scapy==2.5.0
 urllib3==2.0.2
+pytest==7.4.3

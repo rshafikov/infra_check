@@ -1,12 +1,14 @@
 import glob
 import os
 
-from core import run_check_wrapper
+from core import is_check_enabled, run_check_wrapper, save_to_file
 
 
 @run_check_wrapper
-def search_cyrillic(cobbler_directory='./'):
-    stdout = ''
+def search_cyrillic(conf):
+    cobbler_directory = conf.config.get(
+        'CHECK', 'cyrillic_search_dir', fallback='/var/www/html/')
+    stdout = f'SEARCH_PATH: {cobbler_directory}\n'
     if not os.path.exists(cobbler_directory):
         raise FileNotFoundError(
             "file path {} doesn't exist".format(cobbler_directory))
@@ -46,14 +48,13 @@ def search_cyrillic(cobbler_directory='./'):
                                     cyrillic_word += line[char_n]
                                     char_n += 1
                                 stdout += (
-                                    "Found cyrillic symbols "
+                                    "Cyrrilic: "
                                     "'{}' in line {}:{} "
                                     "of file '{}'\n".format(
                                         cyrillic_word,
                                         line_number,
                                         char_n,
-                                        ('.../'+filename[(len(
-                                            cobbler_directory)):])
+                                        filename
                                     )
                                 )
                                 break
@@ -65,9 +66,10 @@ def search_cyrillic(cobbler_directory='./'):
     return stdout
 
 
-def main():
-    search_cyrillic(input('Enter path to find cyrrilic:\n'))
+@is_check_enabled(check_name='check_cyrillic')
+def main_check_cyrillic(conf, check_name, *args, **kwargs):
+    save_to_file(check_name=check_name, content=search_cyrillic(conf=conf))
 
 
 if __name__ == '__main__':
-    main()
+    main_check_cyrillic()
