@@ -5,9 +5,10 @@ from typing import Optional
 from urllib.parse import urlparse
 
 import requests as r
-from core import (get_value_from_env, get_values_from_env, is_check_enabled,
-                  save_to_file)
 from requests.exceptions import ConnectionError, InvalidSchema
+
+from icarus.checks.core import (get_value_from_env, get_values_from_env,
+                                is_check_enabled, save_to_file)
 
 
 class HTTPException(Exception):
@@ -107,6 +108,4 @@ def main_check_repo(conf, check_name, *args, **kwargs) -> None:
 
 
 if __name__ == '__main__':
-    import logging
-    logging.debug('ffdaf')
     json.dumps(main_check_repo(), indent=4)

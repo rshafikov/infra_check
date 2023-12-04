@@ -1,7 +1,8 @@
 import glob
 import os
 
-from core import is_check_enabled, run_check_wrapper, save_to_file
+from icarus.checks.core import (is_check_enabled, run_check_wrapper,
+                                save_to_file)
 
 
 @run_check_wrapper

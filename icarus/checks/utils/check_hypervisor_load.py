@@ -115,40 +115,39 @@ def get_and_update_last_screen(csv_file_path='/tmp/virt-output.csv'):
     screen_filled = {
         '_running': vm_count,
         '_hosted': screen.get('Hosted'),
-        'server_list': [
-            {
-                'hypervisor_hostname': hostname,
-                'host_cpus': host_cpus,
-                'host_ram': host_ram_mb,
-                '_domain_name': screen.get('Domain name'),
-                '_domain_id': screen.get('Domain ID'),
-                'block_read': screen.get('Block RDBY'),
-                'block_write': screen.get('Block WRBY'),
-                'cpu_%': format(
-                    float(screen.get('%CPU').replace(',', '.')), '.3f'),
-                'ram_%': screen.get('%Mem'),
-                'net_received': screen.get('Net RXBY'),
-                'net_sent': screen.get('Net TXBY')
-            }]
-        }
+        'server_list': [{
+            'hypervisor_hostname': hostname,
+            'host_cpus': host_cpus,
+            'host_ram': host_ram_mb,
+            '_domain_name': screen.get('Domain name'),
+            '_domain_id': screen.get('Domain ID'),
+            'block_read': screen.get('Block RDBY'),
+            'block_write': screen.get('Block WRBY'),
+            'cpu_%': format(
+                float(screen.get('%CPU').replace(',', '.')), '.3f'),
+            'ram_%': screen.get('%Mem'),
+            'net_received': screen.get('Net RXBY'),
+            'net_sent': screen.get('Net TXBY')
+        }]
+    }
 
     if screen_filled['_hosted'] and vm_count > 1:
         hosted = screen_filled.get('_hosted')
-        for num in range(0, vm_count-1):
+        for num in range(0, vm_count - 1):
             screen_filled['server_list'].append(
                 {
                     'hypervisor_hostname': hostname,
                     'host_cpus': host_cpus,
                     'host_ram': host_ram_mb,
-                    '_domain_name': hosted[num*10+1],
-                    '_domain_id': hosted[num*10],
-                    'block_read': hosted[num*10+6],
-                    'block_write': hosted[num*10+7],
+                    '_domain_name': hosted[num * 10 + 1],
+                    '_domain_id': hosted[num * 10],
+                    'block_read': hosted[num * 10 + 6],
+                    'block_write': hosted[num * 10 + 7],
                     'cpu_%': format(
-                        float(hosted[num*10+3].replace(',', '.')), '.3f'),
-                    'ram_%': hosted[num*10+5],
-                    'net_received': hosted[num*10+8],
-                    'net_sent': hosted[num*10+9]
+                        float(hosted[num * 10 + 3].replace(',', '.')), '.3f'),
+                    'ram_%': hosted[num * 10 + 5],
+                    'net_received': hosted[num * 10 + 8],
+                    'net_sent': hosted[num * 10 + 9]
                 }
             )
     return screen_filled

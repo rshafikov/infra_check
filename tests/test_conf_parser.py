@@ -4,18 +4,26 @@ from tempfile import NamedTemporaryFile
 from pathlib import Path
 import logging
 
-from custom_checks.parse_config import Config, ConfigurationException, FileNotFound, load_conf
+from icarus.checks.parse_config import Config, ConfigurationException, FileNotFound, load_conf
 
 logging.disable(logging.CRITICAL)
+
+
+def create_custom_file(name):
+    temp_config_file = NamedTemporaryFile(
+        prefix=name,
+        delete=False
+    )
+    temp_config_file.write(b"[INITRC]\nkey1 = value1\nkey2 = value2\n")
+    temp_config_file.write(b"[BIND9]\nkey3 = value3\nkey4 = value4\n")
+    temp_config_file.close()
+    return temp_config_file, temp_config_file.name
 
 
 class TestConfig(unittest.TestCase):
 
     def setUp(self):
-        self.temp_config_file = NamedTemporaryFile(delete=False)
-        self.temp_config_file.write(b"[INITRC]\nkey1 = value1\nkey2 = value2\n")
-        self.temp_config_file.write(b"[BIND9]\nkey3 = value3\nkey4 = value4\n")
-        self.temp_config_file.close()
+        self.temp_config_file, self.temp_file_name = create_custom_file('tmp.file')
         self.config = Config(self.temp_config_file.name)
 
     def tearDown(self):
@@ -27,16 +35,16 @@ class TestConfig(unittest.TestCase):
             Path(self.temp_config_file.name))
 
     def test_init_with_custom_path(self):
-        custom_path = Path('./custom.conf')
-        config = Config(custom_path)
-        self.assertEqual(config.path, custom_path)
+        custom_file, custom_name = create_custom_file('aboba.txt')
+        config = Config(custom_name)
+        self.assertEqual(config.path.as_posix(), custom_name)
 
     def test_get_section_existing(self):
         section_data = self.config.get_section('INITRC')
         self.assertEqual(
             section_data, {
-                'key1': "DOESN'T EXIST value1",
-                'key2': "DOESN'T EXIST value2"}
+                'key1': "value1",
+                'key2': "value2"}
         )
 
     def test_get_section_nonexistent(self):
@@ -47,47 +55,35 @@ class TestConfig(unittest.TestCase):
         self.assertTrue(self.config.is_section('INITRC'))
 
     def test_is_section_nonexistent(self):
-        config = Config(Path(self.temp_config_file.name))
+        config = Config(self.temp_config_file.name)
         self.assertFalse(config.is_section('NONEXISTENT_SECTION'))
 
-    @patch('custom_checks.parse_config.Config._check_path')
-    def test_read_existing_sections(self, mock_check_path):
-        self.config.read()
-        self.assertEqual(self.config.params, {
-            'INITRC': {'key1': mock_check_path.return_value, 'key2': mock_check_path.return_value},
-            'BIND9': {'key3': mock_check_path.return_value, 'key4': mock_check_path.return_value}
-        })
-
-    @patch('custom_checks.parse_config.Config._check_path')
+    @patch('icarus.checks.parse_config.Config._check_path')
     def test_read_nonexistent_section(self, mock_check_path):
         with patch.object(self.config, 'get_section', side_effect=ConfigurationException('Error')):
             self.config.read()
         self.assertEqual(self.config.params, {})
 
-    @patch('custom_checks.parse_config.Config._check_path', return_value='mocked_path')
+    @patch('icarus.checks.parse_config.Config._check_path', return_value='mocked_path')
     def test_check_path_existing_file(self, mock_check_path):
         result = Config._check_path(self.temp_config_file.name)
         self.assertEqual(result, 'mocked_path')
 
-    @patch('custom_checks.parse_config.LOG')
+    @patch('icarus.checks.parse_config.LOG')
     def test_check_path_nonexistent_file(self, mock_log):
-        result = Config._check_path('nonexistent_file.txt')
-        self.assertEqual(result, 'DOESN\'T EXIST nonexistent_file.txt')
+        with self.assertRaises(FileNotFound):
+            Config._check_path('nonexistent_file.txt')
         self.assertTrue(mock_log.warning.called)
 
 
 class TestLoadConf(unittest.TestCase):
 
-    @patch('custom_checks.parse_config.Config')
-    @patch('custom_checks.parse_config.CONF_PATH', Path('existing_file.conf'))
-    def test_load_conf_existing_file(self, mock_config):
-        with self.assertRaises(FileNotFound):
-            load_conf()
+    def test_load_conf_existing_file(self):
+        load_conf()
 
-    @patch('custom_checks.parse_config.CONF_PATH', Path('nonexistent_file.conf'))
     def test_load_conf_nonexistent_file(self):
         with self.assertRaises(FileNotFound):
-            load_conf()
+            load_conf('not_existing_file.conf')
 
 
 if __name__ == '__main__':

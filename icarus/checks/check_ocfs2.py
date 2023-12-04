@@ -1,4 +1,3 @@
-import json
 import random
 import string
 
@@ -41,23 +40,10 @@ def get_list_of_hostnames(
 
 # @run_check_wrapper
 def parse_dns_record_pattern(
-        bind9_path, cluster_type='hypervisor'):
+        bind9_path):
     hostname_patterns = get_value_from_file(
-        'update add', bind9_path).split('\n')[:-1]
-    pattern_dict = {'full_pattern_list': [
-        p for p in hostname_patterns if '$REVERSE_IP' not in p]
-    }
-    pattern_dict.update({
-       'hypervisor': (pattern_dict.get('full_pattern_list')[0]),
-       'controller': (pattern_dict.get('full_pattern_list')[1]),
-       'dbmaster': (pattern_dict.get('full_pattern_list')[2])
-    })
-    n_full_pattern = pattern_dict.get(cluster_type)
-    n_name_pattern = next(
-        n for n in n_full_pattern.split() if '$CLOUD_ZONE' in n)
-    n_ip_pattern = next(
-        n for n in n_full_pattern.split() if '$NET.$hosti' in n)
-    return n_full_pattern, n_name_pattern, n_ip_pattern
+        'update add', bind9_path).split('\n')
+    return next(p for p in hostname_patterns if '$REVERSE_IP' not in p)
 
 
 # @run_check_wrapper
@@ -102,7 +88,7 @@ def check_ocfs2(initrc, bind9_path, cluster_type='hypervisor'):
     ocfs2_ips_up = get_value_from_env(
         'OCFS2_IPS', initrc).split('=')[1].split()
     ocfs_number_of_nodes_list = [subprocess.getoutput(
-        "echo {} | ".format(ip)+" awk -F'.' '{ print $4 }'")
+        "echo {} | ".format(ip) + " awk -F'.' '{ print $4 }'")
         for ip in ocfs2_ips_up]
     cloud_zone_up = get_value_from_env('$CLOUD_ZONE', initrc).split('\n')
     cloud_zone_up = ''.join(
@@ -110,9 +96,8 @@ def check_ocfs2(initrc, bind9_path, cluster_type='hypervisor'):
     net_up = get_value_from_env('$NET', initrc).split('\n')
     net_up = ''.join(
         s for s in net_up if 'NET' in s).split('=')[1]
-    (node_full_pattern,
-     node_name_pattern,
-     node_ip_pattern) = parse_dns_record_pattern(bind9_path, cluster_type)
+    node_full_pattern = parse_dns_record_pattern(
+        '/Users/rshafikov/Desktop/_work/modulo/cobbler/custom_checks/1.7/install_update-dns')
     hosti_range = get_value_from_file(
         'for hosti', bind9_path).split('\n')
     ocfs_config.update({
@@ -122,8 +107,6 @@ def check_ocfs2(initrc, bind9_path, cluster_type='hypervisor'):
         '$CLOUD_ZONE': cloud_zone_up,
         '$NET': net_up,
         'NODE_FULL_PATTERN': node_full_pattern,
-        'NODE_NAME_PATTERN': node_name_pattern,
-        'NODE_IP_PATTERN': node_ip_pattern,
         '$hosti': {
             'hypervisor': hosti_range[0],
             'controller': hosti_range[1],
@@ -144,8 +127,10 @@ def check_cluster(initrc_, bind9, cluster_type='hypervisor'):
 
 
 def main():
+    # dns_pattern_file_path = '/Users/rshafikov/Desktop/_work/modulo/cobbler/custom_checks/1.7/install_update-dns'
+    # parse_dns_record_pattern(dns_pattern_file_path)
     check_cluster(
-        '/Users/rshafikov/Desktop/_work/modulo/cobbler/custom_checks/1.7/install_ocfs2',
+        '/Users/rshafikov/Desktop/_work/modulo/cobbler/custom_checks/1.7/initrc_.ocfs2',
         '/Users/rshafikov/Desktop/_work/modulo/cobbler/custom_checks/1.7/install_bind9',
     )
     # path = input('Enter path of the directory with initrc_ files:\n')

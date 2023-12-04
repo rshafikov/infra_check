@@ -1,11 +1,11 @@
-from check_ldap import main_check_ldap
-from check_repo import main_check_repo
-from check_context_without_comments import main_check_cyrillic
-from check_macs import main_check_macs
-from check_san import main_check_san
-from check_ntp import main_check_ntp
-from check_dns import main_check_dns
-from check_mtu import main_check_ping
+from icarus.checks.check_context_without_comments import main_check_cyrillic
+from icarus.checks.check_dns import main_check_dns
+from icarus.checks.check_ldap import main_check_ldap
+from icarus.checks.check_macs import main_check_macs
+from icarus.checks.check_mtu import main_check_ping
+from icarus.checks.check_ntp import main_check_ntp
+from icarus.checks.check_repo import main_check_repo
+from icarus.checks.check_san import main_check_san
 
 
 class CheckRunner:
@@ -52,6 +52,10 @@ class CheckRunner:
         self._check_ldap()
 
 
-if __name__ == '__main__':
+def main():
     runner = CheckRunner()
     runner.run()
+
+
+if __name__ == '__main__':
+    main()

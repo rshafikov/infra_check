@@ -2,35 +2,35 @@ import json
 import logging
 import subprocess
 
-from core import (CONF, PLATFORM, is_check_enabled,
-                  run_check_wrapper, save_to_file)
+from icarus.checks.core import (CONF, PLATFORM, is_check_enabled,
+                                run_check_wrapper, save_to_file)
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(CONF.config.get('DEFAULT', 'log_level', fallback='INFO').upper())
 
 
 PLAT_DEPS = {
-        'linux': {
-            'cmd': 'ping -c 1 -s {size} -M dont -W 1 {dest_server}',
-            'err_codes': {
-                1: 'wrong size',
-                2: 'check destination server'
-            },
-            'ok_codes': {
-                0: 'OK'
-            }
+    'linux': {
+        'cmd': 'ping -c 1 -s {size} -M dont -W 1 {dest_server}',
+        'err_codes': {
+            1: 'wrong size',
+            2: 'check destination server'
         },
-        'darwin': {
-            'cmd': 'ping -c 1 -s {size} -D -W 1 {dest_server}',
-            'err_codes': {
-                2: 'wrong size',
-                68: 'check destination server'
-            },
-            'ok_codes': {
-                0: 'OK'
-            }
+        'ok_codes': {
+            0: 'OK'
+        }
+    },
+    'darwin': {
+        'cmd': 'ping -c 1 -s {size} -D -W 1 {dest_server}',
+        'err_codes': {
+            2: 'wrong size',
+            68: 'check destination server'
+        },
+        'ok_codes': {
+            0: 'OK'
         }
     }
+}
 
 
 @run_check_wrapper
@@ -45,7 +45,7 @@ def check_mtu(dest_server, max_size=9000, step=100):
 
     for size in range(max_size, 0, -step):
         cmd = PLAT_DEPS[PLATFORM].get('cmd').format(
-                size=str(size-28), dest_server=dest_server)
+            size=str(size - 28), dest_server=dest_server)
         ping_args = {
             'stdout': subprocess.PIPE,
             'stderr': subprocess.PIPE,

@@ -1,16 +1,12 @@
 import json
-import socket
-import sys
 import logging
+import socket
 
-from core import (
-    CONF, get_values_from_env, is_check_enabled,
-    run_check_wrapper, save_to_file
-)
+from icarus.checks.core import (CONF, get_values_from_env, is_check_enabled,
+                                run_check_wrapper, save_to_file)
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(CONF.config.get('DEFAULT', 'log_level', fallback='INFO').upper())
-
 
 DNS_CONN_ERR = {
     'ok': 'ok',
@@ -48,8 +44,9 @@ def _check_dns(server: str) -> str:
 
 def _get_dns_from_initrc(initrc_path, ntp_pattern=r'\w+_DNS[0-9]?'):
     return get_values_from_env(
-            initrc_path,
-            pattern=ntp_pattern)
+        initrc_path,
+        pattern=ntp_pattern
+    )
 
 
 @is_check_enabled(check_name='check_dns')

@@ -1,18 +1,18 @@
 import logging
+import os
 import re
 from configparser import ConfigParser
 from pathlib import Path
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler(),
-              logging.FileHandler(filename='infra_check.log', mode='w')],
+    handlers=[logging.FileHandler(filename='/tmp/infra_check.log', mode='a')],
     level=logging.INFO
 )
 
 LOG = logging.getLogger(__name__)
-CONF_PATH = '../infra.conf'
-# SECTIONS = ['INITRC', 'BIND9']
+
+CONF_PATH = os.path.join(os.path.expanduser("~"), ".infra.conf'")
 
 
 class ConfigurationException(Exception):
@@ -65,7 +65,7 @@ class Config:
 
     def _get_initrc_list(self):
         try:
-            return [v for k, v in self.get_section(
+            return [v.replace("'", "").replace('"', '') for k, v in self.get_section(
                 'INITRC').items() if k.startswith('initrc')]
         except ConfigurationException as err:
             return None

@@ -7,7 +7,7 @@ import sys
 import traceback
 from functools import wraps
 
-from custom_checks.parse_config import load_conf
+from icarus.checks.parse_config import load_conf
 
 PLATFORM = sys.platform
 CONF = load_conf()
@@ -92,13 +92,10 @@ def file_to_dict(file_path, pattern=r'export (\w+)=(.*)'):
     return result_dict
 
 
-@run_check_wrapper
 def get_value_from_env(value, path):
     cmd = '. {} && env | grep {}'.format(path, value)
     output = subprocess.getoutput(cmd)
-    if not output:
-        return f'No {value} in {path}'
-    return subprocess.getoutput(cmd)
+    return output
 
 
 def get_values_from_env(path, pattern=None):
@@ -135,7 +132,7 @@ def find_file_by_pattern(pattern, path):
     return f'No file with name: {pattern}'
 
 
-def save_to_file(check_name, content, path='endtest.txt'):
+def save_to_file(check_name, content, path='/tmp/endtest.txt'):
     init_part = f'<{check_name.upper()}>'.center(110, '-')
     print(init_part)
     if content:
@@ -146,6 +143,7 @@ def save_to_file(check_name, content, path='endtest.txt'):
     else:
         print('unable to write result for %s' % check_name)
         LOG.warning('unable to write result for %s' % check_name)
+
 
 @run_check_wrapper
 def load_env(file_path='/root/admin-openrc'):

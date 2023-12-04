@@ -5,8 +5,8 @@ import struct
 import time
 from socket import AF_INET, SOCK_DGRAM
 
-from core import (CONF, get_values_from_env, is_check_enabled,
-                  run_check_wrapper, save_to_file)
+from icarus.checks.core import (CONF, get_values_from_env, is_check_enabled,
+                                run_check_wrapper, save_to_file)
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(CONF.config.get('DEFAULT', 'log_level', fallback='INFO').upper())
@@ -29,8 +29,9 @@ def _get_ntp_time(host='pool.ntp.org'):
 
 def _get_ntp_from_initrc(initrc_path, ntp_pattern=r'\w+_NTP[0-9]?'):
     return get_values_from_env(
-            initrc_path,
-            pattern=ntp_pattern)
+        initrc_path,
+        pattern=ntp_pattern
+    )
 
 
 @run_check_wrapper

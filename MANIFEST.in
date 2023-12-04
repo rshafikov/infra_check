@@ -1,0 +1,25 @@
+global-include *.mo
+global-include *.py
+global-include *.example
+
+global-exclude *.po
+
+exclude .gitignore
+exclude .gitreview
+exclude *.bak
+
+include setup.py
+include requirements.txt
+exclude requirements_test.txt
+exclude requirements_build.txt
+exclude run_tests.py
+exclude Makefile
+exclude MANIFEST.in
+exclude deb10_packages.tar
+exclude deb11_pacakges.tar
+
+recursive-exclude venv *
+
+prune .hooks
+prune doc
+prune .eggs

@@ -1,13 +1,9 @@
+import logging
 import subprocess
 
-import json
-from core import (
-    CONF, run_check_wrapper, check_package,
-    is_check_enabled, save_to_file
-)
-from parse_config import load_conf
-
-import logging
+from icarus.checks.core import (CONF, check_package, is_check_enabled,
+                                run_check_wrapper, save_to_file)
+from icarus.checks.parse_config import load_conf
 
 LOG = logging.getLogger(__name__)
 LOG.setLevel(CONF.config.get('DEFAULT', 'log_level', fallback='INFO').upper())
@@ -79,7 +75,8 @@ def check_ldap(password, servers, container, base, ldap_filter):
             LOG.debug(
                 'stderr:\n%s' % req.stderr if req.stderr else 'no stderr')
             res_code = req.returncode
-            _, out = req.stdout.split('# search result') if req.stdout else ('', req.stderr)
+            _, out = req.stdout.split(
+                '# search result') if req.stdout else ('', req.stderr)
             if res_code in SHELL_PARAMS['ok_codes']:
                 return f"{SHELL_PARAMS['ok_codes'][res_code]}\n{out}"
             elif res_code in SHELL_PARAMS['err_codes']:
@@ -111,7 +108,8 @@ def main_check_ldap(main_conf, check_name, *args, **kwargs):
         for keystone_conf in ('keystone_conf_ipa', 'keystone_conf_msad'):
             try:
                 ipa_conf = load_conf(
-                    config_path=main_conf.get_section('KEYSTONE')[keystone_conf])
+                    config_path=main_conf.get_section(
+                        'KEYSTONE')[keystone_conf])
             except KeyError as err:
                 LOG.warning('parameter %s in infra.conf not found' % err)
                 continue
