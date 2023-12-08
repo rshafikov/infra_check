@@ -24,62 +24,82 @@
 
 <br>
 
+### Содержание архива:
+
+- `dist/icarus-<version>.tar.gz` - python-пакет со всеми проверками
+
+- `README.md` - инструкция
+
+- `infra.conf` - пример файла конфигурации, который должен быть расположен в директории пользователя как скрытый файл `/home/user/.infra.conf`
+
+- `deb1*_packages.tar` - необходимые deb-пакеты для работы модуля
+
 ### Установка
 
-1. Архив `icarus-<version>.tar.gz` загружается на `Cobbler`.
+1. Архив `icar.tar` загружается на `Cobbler`.
 
 - Для корретной работы проверок в ОС должны быть установленные следующие пакеты:
 		
 	- `ldap-utils`
 
-    - `isc-dhcp-client`
+- Если они не установлены, то проверка, используюшая данный пакет сообщит о его отсутствии. 
+
+- Установите их из `deb1*_packages.tar`
 
 - Установка выполняется в виртуальное окружение:
 
 ```shell
-python3 -m venv venv
-source venv/bin/activate
-pip3 install icarus-<version>.tar.gz
+mkdir icar # создадим папку, что не мусорить
+mv icar.tar.gz icar # переместим главный архив в созданную директорию
+python3 -m venv venv # создадим виртуальное окружение
+source venv/bin/activate # активируем окружение
+pip3 install icarus-<version>.tar.gz # установим пакет
 ```
 
 ### Запуск:
 
-1. Перед запуском необходимо заполнить файл конфигурации `.infra.conf` и разместить его в домашней директории пользователя 
+1. Можно запустить проверку без заполнения файла конфигурации `.infra.conf`, взяв образец в главном архиве и разместить его в домашней директории пользователя 
+
+```shell
+# Находимся все еще в дирекотории icar
+mv infra.conf ~/home/$USER/.infra.conf
+```
 
 2. Образец конфигурации с примерами заполнения:
 
 ```toml
-# every path should be either quoted with "''" or unquoted
-# first line is default value, next line - your value
+# каждый путь до файла должен быть либо в таких '' кавычках, либо без
+# не допускается ставить пробелы перед значением:
+# НЕЛЬЗЯ:(начало строки) test = 1234 # лишний пробел перед "test"
+# не допускается указывать значение и комментарий на одной строке:
+# НЕЛЬЗЯ:(начало строки)test = 1234 # "комментарий" # комментарий и значение на одной строке
+# ВСЕ закоменченные ниже строки - есть ЗНАЧЕНИЯ по-умолчанию
+
 [DEFAULT]
-log_level = INFO
+# ПАРАМЕТР = ЗНАЧЕНИЕ ПО-УМОЛЧАНИЮ # не нужно раскоменчивать эти значения
+# mtu_dest = localhost ya.ru # укажите ip/dn для проверки MTU, желательно один и тот же физический хост, но с интерфейсами из разных подсетей
+# san_servers = raise NoSANSetupError # укажите хосты, которые хотите проверить
+# log_level = INFO # можно поднять до уровня DEBUG
+# mtu_size_step = 9000 100 # максимальный MTU для проверки, а также шаг проверки
+# cyrillic_search_dir = '/var/www/html/' # путь до директории для рекурсивного поиска кириллицы
+# dhcpd_path = /etc/dhcp/dhcpd.conf # путь до файла с содержанием MAC-адресов кобблера
+# repo_pattern = REPO[0-9]? # паттерн регулярного выражения, для поиска репозиториев в INITRC-файлах
+# ntp_pattern =\w+_NTP[0-9]? # паттерн регулярного выражения, для поиска NTP-серверов в INITRC-файлах
+# dns_pattern = \w+_DNS[0-9]? # паттерн регулярного выражения, для поиска DNS-серверов в INITRC-файлах
 
-# cyrillic_search_dir = '/var/www/html/' # default
-cyrillic_search_dir = '/Users/rshafikov/Desktop/_work/modulo/cobbler/custom_checks/1.7/'
-
-# mtu_dest = localhost ya.ru default
+san_servers = ya.ru google.com
+mtu_size_step = 2000 100
 mtu_dest = ya.ru google.com
-
-# mtu_size_step = '9000 100' default
-mtu_size_step = 1600 200
-
-# dhcpd_path = '/etc/dhcp/dhcpd.conf' # default
-# san_servers = raise NoSANSetupError # can be empty
-san_servers = ya.ru 127.0.0.1
-
-# repo_pattern = REPO[0-9]? # default
-# ntp_pattern =\w+_NTP[0-9]? # default
-# dns_pattern = \w+_DNS[0-9]? # default
 [INITRC]
-# this section must be filled
-initrc_ = '/home/user/cobbler/initrc_'
-initrc_2 = '/home/user/cobbler/initrc_'
+# REQUIRED
+initrc_ = '/var/www/html/ha/stable/astra/1.7/initrc_'
+# REQUIRED
+initrc_2 = '/var/www/html/ha/stable/astra/1.7/initrc_2'
 [KEYSTONE]
-# this section must be filled for LDAP-check
-keystone_conf_msad = '/home/user/cobbler/keystone.msad.conf'
-keystone_conf_ipa = '/home/user/cobbler/keystone.ipa.conf'
+# заполните эту секцию путями до файлов с конфигурации внещних LDAP-доменов, включите "check_ldap"
+# keystone_conf_msad = '/tmp/keystone/keystone.msad.conf'
+# keystone_conf_ipa = '/tmp/keystone/keystone.ipa.conf'
 [CHECK]
-# checks with True state will be started
 check_repo = True
 check_cyrillic = True
 check_macs = True
@@ -88,7 +108,6 @@ check_ntp = True
 check_dns = True
 check_mtu = True
 check_ldap = False
-# this checks don't work yet
 check_ocfs2 = False
 check_dhcp = False
 ```

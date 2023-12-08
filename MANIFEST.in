@@ -9,6 +9,7 @@ exclude .gitreview
 exclude *.bak
 
 include setup.py
+include infra.conf
 include requirements.txt
 exclude requirements_test.txt
 exclude requirements_build.txt

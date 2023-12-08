@@ -102,7 +102,7 @@ def main_check_ldap(main_conf, check_name, *args, **kwargs):
     #     ['memberOf=cn=msk-virazh-user-pug,cn=groups,cn=accounts,dc=crp,dc=rzd']
     # ]
     required_pckg = 'ldapearch'
-    stdout = f'"{required_pckg}" pac'
+    stdout = f'install package: "{required_pckg}" to continue this test'
     if check_package(required_pckg):
         stdout = ''
         for keystone_conf in ('keystone_conf_ipa', 'keystone_conf_msad'):

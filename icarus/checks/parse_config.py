@@ -15,6 +15,33 @@ LOG = logging.getLogger(__name__)
 CONF_PATH = os.path.join(os.path.expanduser("~"), ".infra.conf'")
 
 
+DEFAULT_CONF = {
+    'DEFAULT': {
+        'mtu_dest': 'ya.ru google.com',
+        'mtu_size_step': '1600 200',
+        'san_servers': 'ya.ru 127.0.0.1',
+        'log_level': 'INFO',
+        'cyrillic_search_dir': '/var/www/html/',
+        'dhcpd_path': '/etc/dhcp/dhcpd.conf',
+        'repo_pattern': 'REPO[0-9]?',
+        'ntp_pattern': '\w+_NTP[0-9]?',
+        'dns_pattern': '\w+_DNS[0-9]?',
+    },
+    'CHECK': {
+        'check_repo': True,
+        'check_cyrillic': True,
+        'check_macs': True,
+        'check_san': True,
+        'check_ntp': True,
+        'check_dns': True,
+        'check_mtu': True,
+        'check_ldap': True,
+        'check_ocfs2': False,
+        'check_dhcp': False
+    }
+}
+
+
 class ConfigurationException(Exception):
     pass
 
@@ -24,7 +51,7 @@ class FileNotFound(Exception):
 
 
 class Config:
-    def __init__(self, path: str = CONF_PATH):
+    def __init__(self, path: str = CONF_PATH, default_dict: dict = {}):
         self.path = Path(self._check_path(path))
         self.config = ConfigParser()
         self.config.read(self.path, 'utf-8')
@@ -75,8 +102,8 @@ class Config:
         return re.compile(pattern)
 
 
-def load_conf(config_path=CONF_PATH):
-    c = Config(config_path)
+def load_conf(config_path=CONF_PATH, default_dict={}):
+    c = Config(config_path, default_dict)
     c.read()
     return c
 

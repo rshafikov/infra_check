@@ -4,11 +4,16 @@ import socket
 from typing import Optional
 from urllib.parse import urlparse
 
+
 import requests as r
 from requests.exceptions import ConnectionError, InvalidSchema
 
 from icarus.checks.core import (get_value_from_env, get_values_from_env,
                                 is_check_enabled, save_to_file)
+
+import urllib3
+
+urllib3.disable_warnings()
 
 
 class HTTPException(Exception):

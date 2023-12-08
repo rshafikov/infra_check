@@ -47,13 +47,13 @@ def is_check_enabled(check_name: str):
 
 
 @run_check_wrapper
-def check_package(package: str):
-    check_result = f'unavailable platfrom: {PLATFORM}'
-    LOG.warning(check_result)
+def check_package(package: str) -> bool:
+    check_result = False
     if PLATFORM == 'linux':
         cmd = f'dpkg -l | grep {package}'
         check_result = subprocess.getoutput(cmd)
 
+    LOG.warning(f'unavailable platfrom: {PLATFORM}')
     return True if check_result else False
 
 

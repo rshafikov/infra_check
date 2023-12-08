@@ -44,7 +44,7 @@ jobs:
             Deleted files:
             ${{ steps.changed-files.outputs.deleted_files }}
             Download new infra_check.tar in a browser via link:
-            http://${{ secrets.HOST }}/my_storage/download/infra_check.tar
+            http://${{ secrets.HOST }}/my_storage/download/icar.tar
 
       - name: Send message to person N
         uses: appleboy/telegram-action@master
@@ -62,7 +62,7 @@ jobs:
             Deleted files:
             ${{ steps.changed-files.outputs.deleted_files }}
             Donwload new infra_check.tar in a browser via link:
-            http://${{ secrets.HOST }}/my_storage/download/infra_check.tar
+            http://${{ secrets.HOST }}/my_storage/download/icar.tar
 
       - name: Send message to person O
         uses: appleboy/telegram-action@master
@@ -80,7 +80,7 @@ jobs:
             Deleted files:
             ${{ steps.changed-files.outputs.deleted_files }}
             Download new infra_check.tar in a browser via link:
-            http://${{ secrets.HOST }}/my_storage/download/infra_check.tar
+            http://${{ secrets.HOST }}/my_storage/download/icar.tar
 
 
   build_and_load:
@@ -96,7 +96,11 @@ jobs:
           key: ${{ secrets.HOST_SSH_KEY }}
           port: ${{ secrets.HOST_PORT }}
           script: |
-            cd infra_check
+            export WD=/home/$USER/infra_check
+            cd "$WD"
             git pull
-            tar --exclude=./venv --exclude=./.git* -cvf infra_check.tar .
-            curl -X POST -F 'path=infra_check.tar' -F 'file=@infra_check.tar' http://${{ secrets.HOST }}/api/upload
+            rm icar.tar
+            rm -rf "$WD/dist"
+            make build
+            tar -cvf icar.tar README.md infra.conf ./dist/icarus-* ./deb1*
+            curl -X POST -F path=icar.tar -F file=@icar.tar http://${{ secrets.HOST }}/api/upload
